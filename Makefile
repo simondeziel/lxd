@@ -177,7 +177,7 @@ endif
 	cd test && ./main.sh
 
 .PHONY: dist
-dist:
+dist: doc
 	# Cleanup
 	rm -Rf $(ARCHIVE).gz
 
@@ -195,6 +195,9 @@ dist:
 
 	git clone --depth=1 https://github.com/canonical/raft $(TMP)/lxd-$(VERSION)/vendor/raft
 	(cd $(TMP)/lxd-$(VERSION)/vendor/raft ; git show-ref HEAD | cut -d' ' -f1 > .gitref)
+
+	# Copy doc output
+	cp -r doc/html $(TMP)/lxd-$(VERSION)/doc/html/
 
 	# Assemble tarball
 	tar --exclude-vcs -C $(TMP) -zcf $(ARCHIVE).gz lxd-$(VERSION)/
