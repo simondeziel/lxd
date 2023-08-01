@@ -455,6 +455,7 @@ func (r *ProtocolLXD) rawWebsocket(url string) (*websocket.Conn, error) {
 
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	// Set TCP timeout options.
 	remoteTCP, _ := tcp.ExtractConn(conn.UnderlyingConn())
