@@ -65,7 +65,10 @@ func httpGetOverUnixSocket(path string) error {
 	}
 
 	client := &http.Client{Transport: &http.Transport{DialContext: dial}}
-	_, err := client.Get("http://unix.socket/")
+	resp, err := client.Get("http://unix.socket/")
+	if err != nil {
+		resp.Body.Close()
+	}
 	return err
 }
 
@@ -74,7 +77,10 @@ func httpGetOverUnixSocket(path string) error {
 func httpGetOverTLSSocket(addr string, cert *shared.CertInfo) error {
 	tlsConfig, _ := shared.GetTLSConfigMem("", "", "", string(cert.PublicKey()), false)
 	client := &http.Client{Transport: &http.Transport{TLSClientConfig: tlsConfig}}
-	_, err := client.Get(fmt.Sprintf("https://%s/", addr))
+	resp, err := client.Get(fmt.Sprintf("https://%s/", addr))
+	if err != nil {
+		resp.Body.Close()
+	}
 	return err
 }
 
