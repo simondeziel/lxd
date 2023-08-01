@@ -458,6 +458,7 @@ func GetRemoteCertificate(address string, useragent string) (*x509.Certificate, 
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	// Retrieve the certificate
 	if resp.TLS == nil || len(resp.TLS.PeerCertificates) == 0 {
