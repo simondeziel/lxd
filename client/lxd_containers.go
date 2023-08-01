@@ -888,6 +888,7 @@ func (r *ProtocolLXD) CreateContainerFile(containerName string, path string, arg
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	// Check the return value for a cleaner error
 	_, _, err = lxdParseResponse(resp)
@@ -1497,6 +1498,7 @@ func (r *ProtocolLXD) CreateContainerTemplateFile(containerName string, template
 			return err
 		}
 	}
+	defer resp.Body.Close()
 	return err
 }
 
