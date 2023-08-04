@@ -129,6 +129,7 @@ func (c *migrationConn) WebSocket(ctx context.Context) (*websocket.Conn, error) 
 
 	if c.outgoingURL != nil && c.outgoingDialer != nil {
 		var err error
+		var resp *http.Request
 		q := c.outgoingURL.Query()
 		q.Set("secret", c.secret)
 		c.outgoingURL.RawQuery = q.Encode()
@@ -137,6 +138,7 @@ func (c *migrationConn) WebSocket(ctx context.Context) (*websocket.Conn, error) 
 			c.mu.Unlock()
 			return nil, err
 		}
+		defer resp.Body.Close()
 
 		c.mu.Unlock()
 		return c.conn, nil
