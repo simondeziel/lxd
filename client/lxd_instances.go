@@ -1456,6 +1456,7 @@ func (r *ProtocolLXD) CreateInstanceFile(instanceName string, filePath string, a
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	// Check the return value for a cleaner error
 	_, _, err = lxdParseResponse(resp)
@@ -1553,6 +1554,7 @@ func (r *ProtocolLXD) rawSFTPConn(apiURL *url.URL) (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusSwitchingProtocols {
 		_, _, err := lxdParseResponse(resp)
@@ -2348,6 +2350,9 @@ func (r *ProtocolLXD) CreateInstanceTemplateFile(instanceName string, templateNa
 
 	// Send the request
 	resp, err := r.DoHTTP(req)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	// Check the return value for a cleaner error
 	if resp.StatusCode != http.StatusOK {
 		_, _, err := lxdParseResponse(resp)
