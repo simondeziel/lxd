@@ -519,6 +519,7 @@ func (r *forwardedResponse) Render(w http.ResponseWriter) error {
 	if err != nil {
 		return err
 	}
+	defer response.Body.Close()
 
 	for key := range response.Header {
 		w.Header().Set(key, response.Header.Get(key))
