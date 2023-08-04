@@ -497,6 +497,7 @@ func imgPostURLInfo(s *state.State, r *http.Request, req api.ImagesPost, op *ope
 	if err != nil {
 		return nil, err
 	}
+	defer raw.Body.Close()
 
 	hash := raw.Header.Get("LXD-Image-Hash")
 	if hash == "" {
