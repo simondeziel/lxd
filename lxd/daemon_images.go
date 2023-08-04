@@ -432,6 +432,7 @@ func ImageDownload(r *http.Request, s *state.State, op *operations.Operation, ar
 		if err != nil {
 			return nil, err
 		}
+		defer raw.Body.Close()
 
 		defer close(doneCh)
 
