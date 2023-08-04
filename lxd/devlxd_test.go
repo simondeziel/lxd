@@ -159,6 +159,7 @@ func TestHttpRequest(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer raw.Body.Close()
 
 	if raw.StatusCode != 500 {
 		t.Fatal(err)

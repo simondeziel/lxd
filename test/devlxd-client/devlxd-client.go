@@ -59,6 +59,7 @@ func devlxdMonitorStream() {
 	if err != nil {
 		panic(err)
 	}
+	defer resp.Body.Close()
 
 	scanner := bufio.NewScanner(resp.Body)
 
@@ -86,10 +87,11 @@ func devlxdMonitorWebsocket(c http.Client) {
 		HandshakeTimeout: time.Second * 5,
 	}
 
-	conn, _, err := dialer.Dial("ws://unix.socket/1.0/events", nil)
+	conn, resp, err := dialer.Dial("ws://unix.socket/1.0/events", nil)
 	if err != nil {
 		return
 	}
+	defer resp.Body.Close()
 
 	for {
 		_, data, err := conn.ReadMessage()
@@ -146,10 +148,11 @@ func devlxdState(ready bool) {
 
 	req.Header.Set("Content-Type", "application/json")
 
-	_, err = client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return
 	}
+	resp.Body.Close()
 }
 
 func main() {
@@ -159,6 +162,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	defer raw.Body.Close()
 
 	if raw.StatusCode != http.StatusOK {
 		fmt.Println("http error", raw.StatusCode)
@@ -216,6 +220,7 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		defer raw.Body.Close()
 
 		value, err := io.ReadAll(raw.Body)
 		if err != nil {
