@@ -715,6 +715,7 @@ func (g *Gateway) LeaderAddress() (string, error) {
 			logger.Debugf("Failed to fetch leader address from %s", address)
 			continue
 		}
+		defer response.Body.Close()
 
 		if response.StatusCode != http.StatusOK {
 			logger.Debugf("Request for leader address from %s failed", address)
