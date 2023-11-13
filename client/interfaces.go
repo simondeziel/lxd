@@ -667,7 +667,7 @@ type InstanceFileArgs struct {
 	GID int64
 
 	// File permissions
-	Mode int
+	Mode uint32
 
 	// File type (file or directory)
 	Type string
@@ -685,7 +685,7 @@ type InstanceFileResponse struct {
 	GID int64
 
 	// File permissions
-	Mode int
+	Mode uint32
 
 	// File type (file or directory)
 	Type string
