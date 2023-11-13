@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"math"
 	"net/http"
 	"net/url"
 	"os"
@@ -486,7 +487,7 @@ func instanceFilePost(s *state.State, inst instance.Instance, path string, r *ht
 			}
 
 			// Set file ownership.
-			if uid >= 0 || gid >= 0 {
+			if (uid >= 0 && uid <= math.MaxInt32) || (gid >= 0 && gid <= math.MaxInt32) {
 				err = file.Chown(int(uid), int(gid))
 				if err != nil {
 					return response.SmartError(err)
@@ -541,7 +542,7 @@ func instanceFilePost(s *state.State, inst instance.Instance, path string, r *ht
 		}
 
 		// Set file ownership.
-		if uid >= 0 || gid >= 0 {
+		if (uid >= 0 && uid <= math.MaxInt32) || (gid >= 0 && gid <= math.MaxInt32) {
 			err = client.Chown(path, int(uid), int(gid))
 			if err != nil {
 				return response.SmartError(err)
