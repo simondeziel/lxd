@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-chi/chi/v5 v5.0.10
-	github.com/go-jose/go-jose/v3 v3.0.0
+	github.com/go-jose/go-jose/v3 v3.0.1
 	github.com/google/uuid v1.4.0
 	github.com/zitadel/oidc/v3 v3.1.1
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
