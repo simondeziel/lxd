@@ -47,8 +47,8 @@ require (
 	github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
-	golang.org/x/sys v0.0.0-20220318055525-2edf467146b5
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
+	golang.org/x/sys v0.15.0
+	golang.org/x/term v0.15.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/inconshreveable/log15.v2 v2.0.0-20200109203555-b30bc20e4fd1
 	gopkg.in/juju/environschema.v1 v1.0.0
