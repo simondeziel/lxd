@@ -42,7 +42,7 @@ require (
 	github.com/pkg/sftp v1.13.4
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rogpeppe/fastuuid v1.2.0
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.7.1
 	github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635
 	go.etcd.io/bbolt v1.3.6
@@ -59,7 +59,7 @@ require (
 )
 
 require (
-	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/digitalocean/go-libvirt v0.0.0-20210723161134-761cfeeb5968 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
@@ -68,7 +68,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/renameio v1.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jkeiser/iter v0.0.0-20200628201005-c8aa0ae784d1 // indirect
 	github.com/juju/collections v0.0.0-20220203020748-febd7cad8a7a // indirect
 	github.com/juju/errors v0.0.0-20220316043928-e10eb17a9eeb // indirect
@@ -99,5 +99,5 @@ require (
 	gopkg.in/macaroon.v2 v2.1.0 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 	gopkg.in/retry.v1 v1.0.3 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
