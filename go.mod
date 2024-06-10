@@ -38,7 +38,7 @@ require (
 	github.com/openfga/api/proto v0.0.0-20240307175852-df09bc1e8e82
 	github.com/openfga/language/pkg/go v0.0.0-20240307152633-772cdd8b6a9c
 	github.com/openfga/openfga v1.5.0
-	github.com/osrg/gobgp/v3 v3.24.0
+	github.com/osrg/gobgp/v3 v3.27.0
 	github.com/pkg/sftp v1.13.6
 	github.com/pkg/xattr v0.4.9
 	github.com/robfig/cron/v3 v3.0.1
@@ -149,7 +149,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
 	golang.org/x/mod v0.16.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/tools v0.19.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240308144416-29370a3891b7 // indirect
