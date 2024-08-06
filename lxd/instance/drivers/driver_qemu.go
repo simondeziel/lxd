@@ -4119,11 +4119,15 @@ func (d *qemu) addDriveConfig(busAllocate busAllocator, bootIndexes map[string]i
 		blockDev["image"] = rbdSource.ImageName
 		blockDev["user"] = rbdSource.UserName
 		blockDev["server"] = []map[string]string{}
-		blockDev["conf"] = "/etc/ceph/" + rbdSource.ClusterName + ".conf"
 
-		if rbdSource.Snapshot != "" {
-			blockDev["snapshot"] = rbdSource.Snapshot
+		// Derference ceph config path.
+		cephConfPath := "/etc/ceph/" + rbdSource.ClusterName + ".conf"
+		target, err := filepath.EvalSymlinks(cephConfPath)
+		if err == nil {
+			cephConfPath = target
 		}
+
+		blockDev["conf"] = cephConfPath
 
 		// Setup the Ceph cluster config (monitors and keyring).
 		monitors, err := storageDrivers.CephMonitors(rbdSource.ClusterName)
