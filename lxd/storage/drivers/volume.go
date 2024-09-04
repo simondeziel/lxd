@@ -99,6 +99,7 @@ type Volume struct {
 	mountFilesystemProbe bool   // Probe filesystem type when mounting volume (when needed).
 	hasSource            bool   // Whether the volume is created from a source volume.
 	parentUUID           string // Set to the parent volume's volatile.uuid (if snapshot).
+	isDeleted            bool   // Whether we're dealing with a hidden volume (kept until all references are gone).
 }
 
 // VolumeCopy represents a volume and its snapshots for copy and refresh operations.
