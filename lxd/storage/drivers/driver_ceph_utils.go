@@ -1005,49 +1005,29 @@ func (d *ceph) parseParent(parent string) (Volume, string, error) {
 // For example a string like
 // <osd-pool-name>/<lxd-specific-prefix>_<rbd-storage-volume>
 // will be split into
-// <osd-pool-name>, <lxd-specific-prefix>, <rbd-storage-volume>.
-func (d *ceph) parseClone(clone string) (poolName string, volumeType string, volumeName string, err error) {
-	idx := strings.Index(clone, "/")
-	if idx == -1 {
-		return "", "", "", errors.New("Unexpected parsing error")
+// <osd-pool-name>, <prefix>, <rbd-storage-volume>.
+func (d *ceph) parseClone(clone string) (poolName string, volumeType string, volumeName string, volumeDeleted bool, err error) {
+	fields := strings.SplitN(clone, "/", 2)
+	if len(fields) != 2 {
+		return "", "", "", false, errors.New("Pool delimiter not found")
 	}
 
-	slider := clone[(idx + 1):]
-	poolName = clone[:idx]
+	volumeName = fields[1]
+	poolName = fields[0]
+	volumeDeleted = strings.HasPrefix(volumeName, "zombie_")
 
-	volumeType = slider
-	idx = strings.Index(slider, "zombie_")
-	if idx == 0 {
-		idx += len("zombie_")
-		volumeType = slider
-		slider = slider[idx:]
+	// Strip zombie prefix.
+	volumeName = strings.TrimPrefix(volumeName, "zombie_")
+
+	f := strings.SplitN(volumeName, "_", 2)
+	if len(f) != 2 {
+		return "", "", "", false, errors.New("Unexpected parsing error")
 	}
 
-	idxType := strings.Index(slider, "_")
-	if idxType == -1 {
-		return "", "", "", errors.New("Unexpected parsing error")
-	}
+	volumeType = f[0]
+	volumeName = f[1]
 
-	if idx == len("zombie_") {
-		idxType += idx
-	}
-
-	volumeType = volumeType[:idxType]
-
-	idx = strings.Index(slider, "_")
-	if idx == -1 {
-		return "", "", "", errors.New("Unexpected parsing error")
-	}
-
-	volumeName = slider
-	idx = strings.Index(volumeName, "_")
-	if idx == -1 {
-		return "", "", "", errors.New("Unexpected parsing error")
-	}
-
-	volumeName = volumeName[(idx + 1):]
-
-	return poolName, volumeType, volumeName, nil
+	return poolName, volumeType, volumeName, volumeDeleted, nil
 }
 
 // getRBDMappedDevPath looks at sysfs to retrieve the device path. If it doesn't find it it will map it if told to
