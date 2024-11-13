@@ -10,7 +10,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/canonical/go-dqlite/v3/driver"
+	"github.com/canonical/go-dqlite/v2/driver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 

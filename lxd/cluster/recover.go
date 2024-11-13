@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	dqlite "github.com/canonical/go-dqlite/v3"
-	"github.com/canonical/go-dqlite/v3/client"
+	dqlite "github.com/canonical/go-dqlite/v2"
+	"github.com/canonical/go-dqlite/v2/client"
 	"gopkg.in/yaml.v2"
 
 	"github.com/canonical/lxd/lxd/db"

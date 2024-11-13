@@ -13,7 +13,7 @@ SPHINXENV=doc/.sphinx/venv/bin/activate
 SPHINXPIPPATH=doc/.sphinx/venv/bin/pip
 GOMIN=1.22.7
 GOCOVERDIR ?= $(shell go env GOCOVERDIR)
-DQLITE_BRANCH=master
+DQLITE_BRANCH=lts-1.17.x
 
 ifneq "$(wildcard vendor)" ""
 	DQLITE_PATH=$(CURDIR)/vendor/dqlite
