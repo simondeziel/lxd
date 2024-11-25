@@ -1079,7 +1079,12 @@ func RunCommandContext(ctx context.Context, name string, arg ...string) (string,
 // start or returns a non-zero exit code then an error is returned containing the output of stderr.
 // Deprecated: Use RunCommandContext.
 func RunCommand(name string, arg ...string) (string, error) {
+	start := time.Now()
+
 	stdout, _, err := RunCommandSplit(context.TODO(), nil, nil, name, arg...)
+
+	difference := time.Now().Sub(start)
+	fmt.Printf("%s %s took: %v\n", name, strings.Join(arg, " "), difference)
 	return stdout, err
 }
 
