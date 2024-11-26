@@ -634,20 +634,7 @@ func copyDevice(inputPath string, outputPath string) error {
 		"conv=nocreat", // Don't create output file if missing (expect caller to have created output file).
 	}
 
-	// Check for Direct I/O support.
-	from, err := os.OpenFile(inputPath, unix.O_DIRECT|unix.O_RDONLY, 0)
-	if err == nil {
-		cmd = append(cmd, "iflag=direct")
-		_ = from.Close()
-	}
-
-	to, err := os.OpenFile(outputPath, unix.O_DIRECT|unix.O_WRONLY, 0)
-	if err == nil {
-		cmd = append(cmd, "oflag=direct")
-		_ = to.Close()
-	}
-
-	_, err = shared.RunCommand(cmd[0], cmd[1:]...)
+	_, err := shared.RunCommand(cmd[0], cmd[1:]...)
 	if err != nil {
 		return err
 	}
