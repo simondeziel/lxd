@@ -1,13 +1,14 @@
 module github.com/canonical/lxd
 
 go 1.22.7
+toolchain go1.23.4
 
 require (
 	github.com/Rican7/retry v0.3.1
 	github.com/armon/go-proxyproto v0.1.0
 	github.com/canonical/go-dqlite v1.22.0
 	github.com/checkpoint-restore/go-criu/v6 v6.3.0
-	github.com/dell/goscaleio v1.15.0
+	github.com/dell/goscaleio v1.17.1
 	github.com/digitalocean/go-qemu v0.0.0-20230711162256-2e3d0186973e
 	github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e
 	github.com/dustinkirkland/golang-petname v0.0.0-20240428194347-eebcea082ee0
@@ -57,7 +58,7 @@ require (
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
 	golang.org/x/oauth2 v0.23.0
 	golang.org/x/sync v0.8.0
-	golang.org/x/sys v0.25.0
+	golang.org/x/sys v0.27.0
 	golang.org/x/term v0.24.0
 	golang.org/x/text v0.18.0
 	google.golang.org/protobuf v1.34.2
