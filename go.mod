@@ -50,16 +50,16 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635
 	github.com/vishvananda/netlink v1.3.0
-	github.com/zitadel/oidc/v3 v3.30.0
+	github.com/zitadel/oidc/v3 v3.33.1
 	go.starlark.net v0.0.0-20240925182052-1207426daebd
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.27.0
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
-	golang.org/x/oauth2 v0.23.0
-	golang.org/x/sync v0.8.0
+	golang.org/x/oauth2 v0.24.0
+	golang.org/x/sync v0.9.0
 	golang.org/x/sys v0.25.0
 	golang.org/x/term v0.24.0
-	golang.org/x/text v0.18.0
+	golang.org/x/text v0.20.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637
 	gopkg.in/yaml.v2 v2.4.0
@@ -69,7 +69,7 @@ require (
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.7.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
