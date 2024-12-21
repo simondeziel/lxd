@@ -4118,7 +4118,6 @@ func (d *qemu) addDriveConfig(busAllocate busAllocator, bootIndexes map[string]i
 		blockDev["pool"] = rbdSource.PoolName
 		blockDev["image"] = rbdSource.ImageName
 		blockDev["user"] = rbdSource.UserName
-		blockDev["server"] = []map[string]string{}
 
 		// Derference ceph config path.
 		cephConfPath := "/etc/ceph/" + rbdSource.ClusterName + ".conf"
@@ -4129,27 +4128,6 @@ func (d *qemu) addDriveConfig(busAllocate busAllocator, bootIndexes map[string]i
 
 		blockDev["conf"] = cephConfPath
 
-		// Setup the Ceph cluster config (monitors and keyring).
-		monitors, err := storageDrivers.CephMonitors(rbdSource.ClusterName)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, monitor := range monitors {
-			idx := strings.LastIndex(monitor, ":")
-			host := monitor[:idx]
-			port := monitor[idx+1:]
-
-			blockDev["server"] = append(blockDev["server"].([]map[string]string), map[string]string{
-				"host": strings.Trim(host, "[]"),
-				"port": port,
-			})
-		}
-
-		rbdSecret, err = storageDrivers.CephKeyring(rbdSource.ClusterName, rbdSource.UserName)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	readonly := slices.Contains(driveConf.Opts, "ro")

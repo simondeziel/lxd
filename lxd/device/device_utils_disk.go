@@ -185,7 +185,7 @@ again:
 
 // diskCephfsOptions returns the mntSrcPath and fsOptions to use for mounting a cephfs share.
 func diskCephfsOptions(clusterName string, userName string, fsName string, fsPath string) (string, []string, error) {
-	// Get the FSID
+	// Get the FSID.
 	fsid, err := storageDrivers.CephFsid(clusterName)
 	if err != nil {
 		return "", nil, err
