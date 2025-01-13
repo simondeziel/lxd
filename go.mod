@@ -1,13 +1,14 @@
 module github.com/canonical/lxd
 
 go 1.22.7
+toolchain go1.23.4
 
 require (
 	github.com/Rican7/retry v0.3.1
 	github.com/armon/go-proxyproto v0.1.0
 	github.com/canonical/go-dqlite v1.22.0
 	github.com/checkpoint-restore/go-criu/v6 v6.3.0
-	github.com/dell/goscaleio v1.15.0
+	github.com/dell/goscaleio v1.18.0
 	github.com/digitalocean/go-qemu v0.0.0-20230711162256-2e3d0186973e
 	github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e
 	github.com/dustinkirkland/golang-petname v0.0.0-20240428194347-eebcea082ee0
@@ -47,7 +48,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635
 	github.com/vishvananda/netlink v1.3.0
 	github.com/zitadel/oidc/v3 v3.30.0
