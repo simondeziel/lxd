@@ -654,7 +654,7 @@ test_backup_rename() {
     false
   fi
 
-  lxc init testimage c1
+  lxc init --empty c1 -d "${SMALL_ROOT_DISK}"
 
   if ! lxc query -X POST /1.0/containers/c1/backups/backupmissing -d '{\"name\": \"backupnewname\"}' --wait 2>&1 | grep -q "Error: Instance backup not found" ; then
     echo "invalid rename response for missing backup"
