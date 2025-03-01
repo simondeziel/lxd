@@ -4128,6 +4128,11 @@ func (d *qemu) addDriveConfig(busAllocate busAllocator, bootIndexes map[string]i
 
 		blockDev["conf"] = cephConfPath
 
+		// Parse the secret (QEMU runs unprivileged and can't read the keyring directly).
+		rbdSecret, err = storageDrivers.CephKeyring(rbdSource.ClusterName, rbdSource.UserName)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	readonly := slices.Contains(driveConf.Opts, "ro")
