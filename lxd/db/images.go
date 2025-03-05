@@ -294,7 +294,7 @@ func (c *ClusterTx) GetCachedImageSourceFingerprint(ctx context.Context, server 
 // ImageExists returns whether an image with the given fingerprint exists.
 func (c *ClusterTx) ImageExists(ctx context.Context, project string, fingerprint string) (bool, error) {
 	table := "images JOIN projects ON projects.id = images.project_id"
-	where := "projects.name = ? AND fingerprint=?"
+	where := "projects.name = ? AND fingerprint = ? LIMIT 1"
 
 	enabled, err := cluster.ProjectHasImages(ctx, c.tx, project)
 	if err != nil {
