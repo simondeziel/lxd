@@ -346,7 +346,7 @@ func (c *ClusterTx) CreatePendingNetwork(ctx context.Context, node string, proje
 	}
 
 	// Check that no network entry for this node and network exists yet.
-	count, err = query.Count(ctx, c.tx, "networks_nodes", "network_id=? AND node_id=?", networkID, nodeInfo.ID)
+	count, err = query.Count(ctx, c.tx, "networks_nodes", "network_id=? AND node_id=? LIMIT 1", networkID, nodeInfo.ID)
 	if err != nil {
 		return err
 	}
