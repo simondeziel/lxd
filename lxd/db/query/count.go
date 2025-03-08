@@ -4,13 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 )
 
 // Count returns the number of rows in the given table.
-func Count(ctx context.Context, tx *sql.Tx, table string, where string, args ...any) (int, error) {
+func Count(ctx context.Context, tx *sql.Tx, table string, where string, limit uint64, args ...any) (int, error) {
 	stmt := "SELECT COUNT(*) FROM " + table
 	if where != "" {
 		stmt += " WHERE " + where
+	}
+
+	if limit > 0 {
+		stmt += " LIMIT " + strconv.FormatUint(limit, 10)
 	}
 
 	rows, err := tx.QueryContext(ctx, stmt, args...)
