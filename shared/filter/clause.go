@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-
-	"github.com/canonical/lxd/shared"
 )
 
 // Clause is a single filter clause in a filter string.
@@ -101,7 +99,7 @@ func Parse(s string, op OperatorSet) (*ClauseSet, error) {
 		clause.PrevLogical = prevLogical
 		if index < len(parts) {
 			prevLogical = parts[index]
-			if !shared.ValueInSlice(prevLogical, []string{op.And, op.Or}) {
+			if prevLogical != op.And && prevLogical != op.Or {
 				return nil, fmt.Errorf("invalid clause composition")
 			}
 
