@@ -332,7 +332,7 @@ func httpsLXD(ctx context.Context, requestURL string, args *ConnectionArgs) (Ins
 		eventListeners:     make(map[string][]*EventListener),
 	}
 
-	if shared.ValueInSlice(args.AuthType, []string{api.AuthenticationMethodOIDC}) {
+	if args.AuthType == api.AuthenticationMethodOIDC {
 		server.RequireAuthenticated(true)
 	}
 
