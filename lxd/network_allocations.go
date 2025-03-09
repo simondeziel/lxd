@@ -184,31 +184,33 @@ func networkAllocationsGet(d *Daemon, r *http.Request) response.Response {
 			}
 
 			for _, lease := range leases {
-				if shared.ValueInSlice(lease.Type, []string{"static", "dynamic", "uplink"}) {
-					cidrAddr, nat, err := ipToCIDR(lease.Address, netConf)
-					if err != nil {
-						return response.SmartError(err)
-					}
-
-					var allocationType, usedBy string
-					if lease.Type == "uplink" {
-						allocationType = "uplink"
-						networkName := strings.TrimSuffix(strings.TrimPrefix(lease.Hostname, lease.Project+"-"), ".uplink")
-						usedBy = api.NewURL().Path(version.APIVersion, "networks", networkName).Project(lease.Project).String()
-					} else {
-						allocationType = "instance"
-						usedBy = api.NewURL().Path(version.APIVersion, "instances", lease.Hostname).Project(lease.Project).String()
-					}
-
-					result = append(result, api.NetworkAllocations{
-						Address: cidrAddr,
-						UsedBy:  usedBy,
-						Type:    allocationType,
-						Hwaddr:  lease.Hwaddr,
-						NAT:     nat,
-						Network: networkName,
-					})
+				if !shared.ValueInSlice(lease.Type, []string{"static", "dynamic", "uplink"}) {
+					continue
 				}
+
+				cidrAddr, nat, err := ipToCIDR(lease.Address, netConf)
+				if err != nil {
+					return response.SmartError(err)
+				}
+
+				var allocationType, usedBy string
+				if lease.Type == "uplink" {
+					allocationType = "uplink"
+					networkName := strings.TrimSuffix(strings.TrimPrefix(lease.Hostname, lease.Project+"-"), ".uplink")
+					usedBy = api.NewURL().Path(version.APIVersion, "networks", networkName).Project(lease.Project).String()
+				} else {
+					allocationType = "instance"
+					usedBy = api.NewURL().Path(version.APIVersion, "instances", lease.Hostname).Project(lease.Project).String()
+				}
+
+				result = append(result, api.NetworkAllocations{
+					Address: cidrAddr,
+					UsedBy:  usedBy,
+					Type:    allocationType,
+					Hwaddr:  lease.Hwaddr,
+					NAT:     nat,
+					Network: networkName,
+				})
 			}
 
 			var forwards map[int64]*api.NetworkForward
