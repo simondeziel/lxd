@@ -859,7 +859,7 @@ func (r *ProtocolLXD) CopyInstance(source InstanceServer, instance api.Instance,
 			}
 		}
 
-		if shared.ValueInSlice(args.Mode, []string{"push", "relay"}) {
+		if args.Mode == "push" || args.Mode == "relay" {
 			if !r.HasExtension("container_push") {
 				return nil, fmt.Errorf("The target server is missing the required \"container_push\" API extension")
 			}
@@ -1967,7 +1967,7 @@ func (r *ProtocolLXD) CopyInstanceSnapshot(source InstanceServer, instanceName s
 	// Process the copy arguments
 	if args != nil {
 		// Quick checks.
-		if shared.ValueInSlice(args.Mode, []string{"push", "relay"}) {
+		if args.Mode == "push" || args.Mode == "relay" {
 			err := r.CheckExtension("container_push")
 			if err != nil {
 				return nil, err
