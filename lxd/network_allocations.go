@@ -164,7 +164,7 @@ func networkAllocationsGet(d *Daemon, r *http.Request) response.Response {
 			netConf := n.Config()
 
 			for _, keyPrefix := range []string{"ipv4", "ipv6"} {
-				ipNet, _ := network.ParseIPCIDRToNet(netConf[fmt.Sprintf("%s.address", keyPrefix)])
+				ipNet, _ := network.ParseIPCIDRToNet(netConf[keyPrefix+".address"])
 				if ipNet == nil {
 					continue
 				}
@@ -173,7 +173,7 @@ func networkAllocationsGet(d *Daemon, r *http.Request) response.Response {
 					Address: ipNet.String(),
 					UsedBy:  api.NewURL().Path(version.APIVersion, "networks", networkName).Project(projectName).String(),
 					Type:    "network",
-					NAT:     shared.IsTrue(netConf[fmt.Sprintf("%s.nat", keyPrefix)]),
+					NAT:     shared.IsTrue(netConf[keyPrefix+".nat"]),
 					Network: networkName,
 				})
 			}
