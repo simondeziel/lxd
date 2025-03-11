@@ -962,7 +962,7 @@ func (g *cmdGlobal) cmpNetworkForwardPortTargetAddresses(networkName string, lis
 
 				results = make([]string, 0, len(network.Addresses))
 				for _, address := range network.Addresses {
-					if shared.ValueInSlice(address.Scope, []string{"link", "local"}) {
+					if address.Scope == "link" || address.Scope == "local" {
 						continue
 					}
 
