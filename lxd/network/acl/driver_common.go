@@ -359,7 +359,7 @@ func (d *common) validateRule(direction ruleDirection, rule api.NetworkACLRule) 
 	}
 
 	// Validate protocol dependent fields.
-	if shared.ValueInSlice(rule.Protocol, []string{"tcp", "udp"}) {
+	if rule.Protocol == "tcp" || rule.Protocol == "udp" {
 		if rule.ICMPType != "" {
 			return fmt.Errorf("ICMP type cannot be used with non-ICMP protocol")
 		}
@@ -383,7 +383,7 @@ func (d *common) validateRule(direction ruleDirection, rule api.NetworkACLRule) 
 				return fmt.Errorf("Invalid Destination port: %w", err)
 			}
 		}
-	} else if shared.ValueInSlice(rule.Protocol, []string{"icmp4", "icmp6"}) {
+	} else if rule.Protocol == "icmp4" || rule.Protocol == "icmp6" {
 		if rule.SourcePort != "" {
 			return fmt.Errorf("Source port cannot be used with %q protocol", rule.Protocol)
 		}
