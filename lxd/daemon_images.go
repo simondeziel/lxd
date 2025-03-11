@@ -78,7 +78,7 @@ func ImageDownload(r *http.Request, s *state.State, op *operations.Operation, ar
 	fp := alias
 
 	// Attempt to resolve the alias
-	if shared.ValueInSlice(protocol, []string{"lxd", "simplestreams"}) {
+	if protocol == "lxd" || protocol == "simplestreams" {
 		clientArgs := &lxd.ConnectionArgs{
 			TLSServerCert: args.Certificate,
 			UserAgent:     version.UserAgent,
