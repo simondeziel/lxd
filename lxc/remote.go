@@ -605,7 +605,7 @@ func (c *cmdRemoteAdd) run(cmd *cobra.Command, args []string) error {
 			c.flagAuthType = api.AuthenticationMethodTLS
 		}
 
-		if shared.ValueInSlice(c.flagAuthType, []string{api.AuthenticationMethodOIDC}) {
+		if c.flagAuthType == api.AuthenticationMethodOIDC {
 			// Update the remote configuration
 			remote := conf.Remotes[server]
 			remote.AuthType = c.flagAuthType
