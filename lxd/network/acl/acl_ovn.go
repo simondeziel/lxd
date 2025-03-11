@@ -508,11 +508,11 @@ func ovnRuleCriteriaToOVNACLRule(direction string, rule *api.NetworkACLRule, por
 		matchParts = append(matchParts, rule.Protocol)
 
 		if rule.ICMPType != "" {
-			matchParts = append(matchParts, fmt.Sprintf("%s.type == %s", rule.Protocol, rule.ICMPType))
+			matchParts = append(matchParts, rule.Protocol+".type == "+rule.ICMPType)
 		}
 
 		if rule.ICMPCode != "" {
-			matchParts = append(matchParts, fmt.Sprintf("%s.code == %s", rule.Protocol, rule.ICMPCode))
+			matchParts = append(matchParts, rule.Protocol+".code == "+rule.ICMPCode)
 		}
 	}
 
