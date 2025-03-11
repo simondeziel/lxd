@@ -798,7 +798,7 @@ func (d Nftables) aclRuleCriteriaToRules(networkName string, ipVersion uint, rul
 	}
 
 	// Add protocol filters.
-	if shared.ValueInSlice(rule.Protocol, []string{"tcp", "udp"}) {
+	if rule.Protocol == "tcp" || rule.Protocol == "udp" {
 		args = append(args, "meta", "l4proto", rule.Protocol)
 
 		if rule.SourcePort != "" {
@@ -808,7 +808,7 @@ func (d Nftables) aclRuleCriteriaToRules(networkName string, ipVersion uint, rul
 		if rule.DestinationPort != "" {
 			args = append(args, d.aclRulePortToACLMatch("dport", shared.SplitNTrimSpace(rule.DestinationPort, ",", -1, false)...)...)
 		}
-	} else if shared.ValueInSlice(rule.Protocol, []string{"icmp4", "icmp6"}) {
+	} else if rule.Protocol == "icmp4" || rule.Protocol == "icmp6" {
 		var icmpIPVersion uint
 		var protoName string
 
