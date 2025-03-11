@@ -1360,7 +1360,7 @@ func (d *common) deviceLoad(inst instance.Instance, deviceName string, rawConfig
 	var err error
 
 	// Create copy of config and load some fields from volatile if device is nic or infiniband.
-	if shared.ValueInSlice(rawConfig["type"], []string{"nic", "infiniband"}) {
+	if rawConfig["type"] == "nic" || rawConfig["type"] == "infiniband" {
 		configCopy, err = inst.FillNetworkDevice(deviceName, rawConfig)
 		if err != nil {
 			return nil, err
