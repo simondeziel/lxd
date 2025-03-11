@@ -603,7 +603,7 @@ func networkClearHostVethLimits(d *deviceCommon) error {
 
 // networkValidGateway validates the gateway value.
 func networkValidGateway(value string) error {
-	if shared.ValueInSlice(value, []string{"none", "auto"}) {
+	if value == "none" || value == "auto" {
 		return nil
 	}
 
