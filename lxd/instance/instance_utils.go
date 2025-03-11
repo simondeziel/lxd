@@ -612,7 +612,7 @@ func SuitableArchitectures(ctx context.Context, s *state.State, tx *db.ClusterTx
 
 			var err error
 			var remote lxd.ImageServer
-			if shared.ValueInSlice(req.Source.Protocol, []string{"", "lxd"}) {
+			if req.Source.Protocol == "" || req.Source.Protocol == "lxd" {
 				// Remote LXD image server.
 				remote, err = lxd.ConnectPublicLXD(req.Source.Server, &lxd.ConnectionArgs{
 					TLSServerCert: req.Source.Certificate,
