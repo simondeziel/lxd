@@ -2050,8 +2050,9 @@ func (d *qemu) setupNvram() error {
 
 func (d *qemu) qemuArchConfig(arch int) (path string, bus string, err error) {
 	basePath := ""
-	if shared.InSnap() && os.Getenv("SNAP_QEMU_PREFIX") != "" {
-		basePath = filepath.Join(os.Getenv("SNAP"), os.Getenv("SNAP_QEMU_PREFIX")) + "/bin/"
+	snapQemuPrefix := os.Getenv("SNAP_QEMU_PREFIX")
+	if snapQemuPrefix != "" && shared.InSnap() {
+		basePath = filepath.Join(os.Getenv("SNAP"), snapQemuPrefix, "/bin/")
 	}
 
 	if arch == osarch.ARCH_64BIT_INTEL_X86 {
