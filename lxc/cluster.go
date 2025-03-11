@@ -625,7 +625,7 @@ Are you really sure you want to force removing %s? (yes/no): `), name)
 	input, _ := reader.ReadString('\n')
 	input = strings.TrimSuffix(input, "\n")
 
-	if !shared.ValueInSlice(strings.ToLower(input), []string{i18n.G("yes")}) {
+	if strings.ToLower(input) != i18n.G("yes") {
 		return errors.New(i18n.G("User aborted delete operation"))
 	}
 
