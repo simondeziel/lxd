@@ -19,11 +19,13 @@ runs:
   using: composite
   steps:
     - name: Install MicroOVN snap
+      env:
+        MICROOVN_CHANNEL: "${{ inputs.microovn-channel }}"
       shell: bash
       run: |
           set -eux
 
-          sudo snap install microovn --channel "${{ inputs.microovn-channel }}"
+          sudo snap install microovn --channel "${MICROOVN_CHANNEL}"
           sudo microovn waitready
           sudo microovn cluster bootstrap
           sudo microovn status
