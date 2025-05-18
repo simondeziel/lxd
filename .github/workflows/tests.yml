@@ -448,9 +448,9 @@ jobs:
           set -eux
           # Using `go env -w` to avoid dealing with setting variables on Windows
           go env -w GOARCH=arm64
-          go build ${{ env.EXTRAS }} -o trimpath -o bin/lxc.aarch64 ./lxc
+          go build ${EXTRAS} -o trimpath -o bin/lxc.aarch64 ./lxc
           go env -w GOARCH=amd64
-          go build ${{ env.EXTRAS }} -o trimpath -o bin/lxc.x86_64 ./lxc
+          go build ${EXTRAS} -o trimpath -o bin/lxc.x86_64 ./lxc
 
       - name: Build static lxd-benchmark
         if: runner.os == 'Linux'
@@ -459,8 +459,8 @@ jobs:
           EXTRAS: ${{ ( env.GOCOVERDIR != '' ) && '-cover' || '-ldflags "-s -w"' }}
         run: |
           set -eux
-          GOARCH=amd64 go build ${{ env.EXTRAS }} -o trimpath -o bin/lxd-benchmark.x86_64 ./lxd-benchmark
-          GOARCH=arm64 go build ${{ env.EXTRAS }} -o trimpath -o bin/lxd-benchmark.aarch64 ./lxd-benchmark
+          GOARCH=amd64 go build ${EXTRAS} -o trimpath -o bin/lxd-benchmark.x86_64 ./lxd-benchmark
+          GOARCH=arm64 go build ${EXTRAS} -o trimpath -o bin/lxd-benchmark.aarch64 ./lxd-benchmark
 
       - name: Build static lxd-migrate
         if: runner.os == 'Linux'
@@ -469,8 +469,8 @@ jobs:
           EXTRAS: ${{ ( env.GOCOVERDIR != '' ) && '-cover' || '-ldflags "-s -w"' }}
         run: |
           set -eux
-          GOARCH=amd64 go build ${{ env.EXTRAS }} -o trimpath -o bin/lxd-migrate.x86_64 ./lxd-migrate
-          GOARCH=arm64 go build ${{ env.EXTRAS }} -o trimpath -o bin/lxd-migrate.aarch64 ./lxd-migrate
+          GOARCH=amd64 go build ${EXTRAS} -o trimpath -o bin/lxd-migrate.x86_64 ./lxd-migrate
+          GOARCH=arm64 go build ${EXTRAS} -o trimpath -o bin/lxd-migrate.aarch64 ./lxd-migrate
 
       - name: Unit tests (client)
         env:
@@ -478,7 +478,7 @@ jobs:
           COVER: ${{ ( env.GOCOVERDIR != '' ) && '-cover -test.gocoverdir="${GOCOVERDIR}"' || '' }}
         run: |
           set -eux
-          go test -v ./client/... ${{ env.COVER }}
+          go test -v ./client/... ${COVER}
 
       - name: Unit tests (lxc)
         env:
@@ -486,7 +486,7 @@ jobs:
           COVER: ${{ ( env.GOCOVERDIR != '' ) && '-cover -test.gocoverdir="${GOCOVERDIR}"' || '' }}
         run: |
           set -eux
-          go test -v ./lxc/... ${{ env.COVER }}
+          go test -v ./lxc/... ${COVER}
 
       - name: Unit tests (shared)
         env:
@@ -494,7 +494,7 @@ jobs:
           COVER: ${{ ( env.GOCOVERDIR != '' ) && '-cover -test.gocoverdir="${GOCOVERDIR}"' || '' }}
         run: |
           set -eux
-          go test -v ./shared/... ${{ env.COVER }}
+          go test -v ./shared/... ${COVER}
 
       - name: Upload coverage data
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
