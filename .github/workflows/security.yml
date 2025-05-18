@@ -6,7 +6,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write # for uploading SARIF results to the security tab
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
@@ -18,6 +17,9 @@ defaults:
 
 jobs:
   trivy-repo:
+    permissions:
+      contents: read
+      security-events: write # for uploading SARIF results to the security tab
     name: Trivy - Repository
     runs-on: ubuntu-24.04
     if: ${{ ( github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' ) && github.ref_name == 'main' && github.repository == 'canonical/lxd' }}
@@ -82,6 +84,9 @@ jobs:
           ref: refs/heads/main
 
   trivy-snap:
+    permissions:
+      contents: read
+      security-events: write # for uploading SARIF results to the security tab
     name: Trivy - Snap
     runs-on: ubuntu-24.04
     needs: trivy-repo
