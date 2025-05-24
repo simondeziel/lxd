@@ -239,6 +239,8 @@ jobs:
 
       - name: Download minio/mc to add to system test dependencies
         uses: ./.github/actions/download-minio
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload system test dependencies
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
