@@ -1,6 +1,12 @@
 name: Download minio/mc
 description: Download minio/mc binaries and cache them for the day
 
+inputs:
+  token:
+    description: Optional GitHub token used to clear older caches
+    default: ""
+    type: string
+
 runs:
   using: composite
   steps:
@@ -22,12 +28,20 @@ runs:
         key: cache-minio-${{ steps.cache-key.outputs.ARCH }}-${{ steps.cache-key.outputs.DATE }}
 
     - name: Download minio/mc
-      if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+      if: ${{ steps.cache-minio.outputs.cache-hit != 'true' }}
       env:
         ARCH: ${{ steps.cache-key.outputs.ARCH }}
+        GH_TOKEN: ${{ inputs.token }}
       shell: bash
       run: |
         set -eux
+
+        # If a token was provided, use it to clear older caches (using partial
+        # cache key) to avoid accumulating dailies for 90 days
+        if [ -n "${GH_TOKEN:-}" ]; then
+          gh cache delete cache-minio-"${ARCH}"-
+        fi
+
         DIR="/home/runner/go/bin"
         mkdir -p "${DIR}"
         # Download minio ready to include in dependencies for system tests.
