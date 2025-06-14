@@ -215,7 +215,7 @@ trap cleanup EXIT HUP INT TERM
 import_subdir_files suites
 
 # Setup test directory
-TEST_DIR="$(mktemp -d -t lxd-test.tmp.XXXX)"
+TEST_DIR=$(mktemp -d -p "$(pwd)" tmp.XXX)
 chmod +x "${TEST_DIR}"
 
 # Verify the dir chain is accessible for other users (other's execute bit has to be `x` or `t` (sticky))
