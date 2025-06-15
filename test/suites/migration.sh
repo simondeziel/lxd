@@ -64,6 +64,10 @@ test_migration() {
       lxc_remote profile device set l1:default root pool "lxdtest-$(basename "${LXD_DIR}")"
       lxc_remote profile device set l2:default root pool "lxdtest-$(basename "${LXD2_DIR}")"
 
+      echo "SDEZIEL - DEBUG"
+      zfs get all -r "${storage_pool1}" || true
+      zfs get all -r "${storage_pool2}" || true
+      find /dev/zvol/ -exec ls -l {} +
       lxc_remote storage delete l1:"$storage_pool1"
       lxc_remote storage delete l2:"$storage_pool2"
     done
@@ -642,7 +646,20 @@ migration() {
 
   # migrate ISO custom volumes
   truncate -s 8MiB foo.iso
-  lxc storage volume import l1:"${pool}" ./foo.iso iso1
+  if ! lxc storage volume import l1:"${pool}" ./foo.iso iso1; then
+      echo "SDEZIEL - DEBUG"
+      zfs get all -r "${pool}" || true
+
+      for mode in default full dev none; do
+        zfs create -s -V 8M -o volmode="${mode}" "${pool}/iso-${mode}"
+        find /dev/zvol/ -exec ls -l {} + || true
+      done
+      sleep 10
+      find /dev/zvol/ -exec ls -l {} + || true
+      zfs get all -r "${pool}" || true
+
+      false
+  fi
   lxc storage volume copy l1:"${pool}"/iso1 l2:"${remote_pool}"/iso1
 
   lxc storage volume show l2:"${remote_pool}" iso1 | grep -xF 'content_type: iso'
