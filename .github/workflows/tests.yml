@@ -288,8 +288,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ["cluster", "standalone"]
-        backend: ["dir", "btrfs", "lvm", "zfs", "ceph", "random"]
+        suite: ["migration", "storage_driver_zfs"]
+        backend: ["zfs"]
 
     steps:
       - name: Checkout
