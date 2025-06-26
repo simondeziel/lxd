@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/canonical/lxd/lxd/operations"
@@ -24,6 +25,7 @@ import (
 
 const lvmVgPoolMarker = "lxd_pool" // Indicator tag used to mark volume groups as in use by LXD.
 
+var lvmActivation sync.Mutex
 var lvmLoaded bool
 var lvmVersion string
 

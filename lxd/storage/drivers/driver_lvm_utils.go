@@ -813,6 +813,9 @@ func (d *lvm) activateVolume(vol Volume) (bool, error) {
 	}
 
 	if !shared.PathExists(volDevPath) {
+		lvmActivation.Lock()
+		defer lvmActivation.Unlock()
+
 		_, err := shared.RunCommandContext(context.TODO(), "lvchange", "--activate", "y", "--ignoreactivationskip", volDevPath)
 		if err != nil {
 			return false, fmt.Errorf("Failed to activate LVM logical volume %q: %w", volDevPath, err)
@@ -851,6 +854,9 @@ func (d *lvm) deactivateVolume(vol Volume) (bool, error) {
 	}
 
 	if shared.PathExists(volDevPath) {
+		lvmActivation.Lock()
+		defer lvmActivation.Unlock()
+
 		// Keep trying to deactivate a few times in case the device is still being flushed.
 		var err error
 		for i := range 20 {
