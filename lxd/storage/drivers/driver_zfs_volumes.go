@@ -858,6 +858,8 @@ func (d *zfs) CreateVolumeFromCopy(vol VolumeCopy, srcVol VolumeCopy, allowIncon
 			d.logger.Debug("Regenerating filesystem UUID", logger.Ctx{"dev": volPath, "fs": vol.ConfigBlockFilesystem()})
 			err = regenerateFilesystemUUID(vol.ConfigBlockFilesystem(), volPath)
 			if err != nil {
+				volMode, _ := d.getDatasetProperty(d.dataset(vol.Volume, false), "volmode")
+				logger.Info("Failed regenerating filesystem UUID", logger.Ctx{"dev": volPath, "volMode": volMode, "err": err})
 				return err
 			}
 		}
@@ -1207,6 +1209,8 @@ func (d *zfs) createVolumeFromMigrationOptimized(vol Volume, conn io.ReadWriteCl
 			d.logger.Debug("Regenerating filesystem UUID", logger.Ctx{"dev": volPath, "fs": vol.ConfigBlockFilesystem()})
 			err = regenerateFilesystemUUID(vol.ConfigBlockFilesystem(), volPath)
 			if err != nil {
+				volMode, _ := d.getDatasetProperty(d.dataset(vol, false), "volmode")
+				logger.Info("Failed regenerating filesystem UUID", logger.Ctx{"dev": volPath, "volMode": volMode, "err": err})
 				return err
 			}
 		}
@@ -3161,6 +3165,8 @@ func (d *zfs) mountVolumeSnapshot(snapVol Volume, snapshotDataset string, mountP
 					d.logger.Debug("Regenerating filesystem UUID", logger.Ctx{"dev": volPath, "fs": tmpVolFsType})
 					err = regenerateFilesystemUUID(mountVol.ConfigBlockFilesystem(), volPath)
 					if err != nil {
+						volMode, _ := d.getDatasetProperty(d.dataset(mountVol, false), "volmode")
+						logger.Info("Failed regenerating filesystem UUID", logger.Ctx{"dev": volPath, "volMode": volMode, "err": err})
 						return nil, err
 					}
 				}
@@ -3406,6 +3412,8 @@ func (d *zfs) restoreVolume(vol Volume, snapVol Volume, migration bool, op *oper
 		d.logger.Debug("Regenerating filesystem UUID", logger.Ctx{"dev": volPath, "fs": vol.ConfigBlockFilesystem()})
 		err = regenerateFilesystemUUID(vol.ConfigBlockFilesystem(), volPath)
 		if err != nil {
+			volMode, _ := d.getDatasetProperty(d.dataset(vol, false), "volmode")
+			logger.Info("Failed regenerating filesystem UUID", logger.Ctx{"dev": volPath, "volMode": volMode, "err": err})
 			return err
 		}
 	}
