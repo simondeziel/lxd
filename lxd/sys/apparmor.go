@@ -128,19 +128,21 @@ func haveMacAdmin() bool {
 }
 
 // getVersion reads and parses the AppArmor version.
-func appArmorGetVersion() (*version.DottedVersion, error) {
+func appArmorGetVersion() (version.DottedVersion, error) {
 	out, err := shared.RunCommandContext(context.TODO(), "apparmor_parser", "--version")
 	if err != nil {
-		return nil, err
+		zeroVersion, _ := version.NewDottedVersion("0")
+		return *zeroVersion, err
 	}
 
 	fields := strings.Fields(strings.SplitN(out, "\n", 2)[0])
-	return version.Parse(fields[len(fields)-1])
+	currentVersion, err := version.Parse(fields[len(fields)-1])
+	return *currentVersion, err
 }
 
 // appArmorGetCacheDir returns the AppArmor cache directory based on the cache location.
 // If appArmor version is less than 2.13, it returns the base cache location directory.
-func appArmorGetCacheDir(ver *version.DottedVersion, cacheLoc string) (string, error) {
+func appArmorGetCacheDir(ver version.DottedVersion, cacheLoc string) (string, error) {
 	// Multiple policy cache directories were only added in v2.13.
 	minVer, err := version.NewDottedVersion("2.13")
 	if err != nil {
