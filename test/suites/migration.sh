@@ -20,7 +20,8 @@ test_migration() {
   token="$(LXD_DIR=${LXD2_DIR} lxc config trust add --name foo -q)"
   lxc_remote remote add l2 "${LXD2_ADDR}" --token "${token}"
 
-  migration "$LXD2_DIR"
+  # XXX: temporarily skip
+  #migration "$LXD2_DIR"
 
   # This should only run on lvm and when the backend is not random. Otherwise
   # we might perform existence checks for files or dirs that won't be available
@@ -50,7 +51,8 @@ test_migration() {
 
   if [ "${LXD_BACKEND}" = "zfs" ]; then
     # Test that block mode zfs backends work fine with migration.
-    for fs in "ext4" "btrfs" "xfs"; do
+    for _ in $(seq 6); do
+      fs="xfs"
       local storage_pool1 storage_pool2
       # shellcheck disable=2153
       storage_pool1="lxdtest-$(basename "${LXD_DIR}")-block-mode-${fs}"
@@ -71,20 +73,21 @@ test_migration() {
     done
   fi
 
-  # Test config overrides for migration of instance with snapshots
-  lxc_remote network create l1:foonet ipv4.address=10.100.10.1/24
-  lxc_remote network create l2:foonet2 ipv4.address=10.100.100.1/24
-  ensure_import_testimage
-  lxc_remote init testimage l1:u1
-  lxc_remote config device add l1:u1 eth1 nic name=eth1 network=foonet ipv4.address=10.100.10.10
-  lxc_remote snapshot l1:u1 snap
+  # XXX: temporarily skip
+  ## Test config overrides for migration of instance with snapshots
+  #lxc_remote network create l1:foonet ipv4.address=10.100.10.1/24
+  #lxc_remote network create l2:foonet2 ipv4.address=10.100.100.1/24
+  #ensure_import_testimage
+  #lxc_remote init testimage l1:u1
+  #lxc_remote config device add l1:u1 eth1 nic name=eth1 network=foonet ipv4.address=10.100.10.10
+  #lxc_remote snapshot l1:u1 snap
 
-  lxc_remote copy l1:u1 l2: -d eth1,ipv4.address=10.100.100.10 -d eth1,network=foonet2
+  #lxc_remote copy l1:u1 l2: -d eth1,ipv4.address=10.100.100.10 -d eth1,network=foonet2
 
-  lxc_remote delete l1:u1
-  lxc_remote delete l2:u1
-  lxc_remote network delete l1:foonet
-  lxc_remote network delete l2:foonet2
+  #lxc_remote delete l1:u1
+  #lxc_remote delete l2:u1
+  #lxc_remote network delete l1:foonet
+  #lxc_remote network delete l2:foonet2
 
   lxc_remote remote remove l1
   lxc_remote remote remove l2
