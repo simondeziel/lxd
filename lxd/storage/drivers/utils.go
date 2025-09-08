@@ -608,6 +608,10 @@ func regenerateFilesystemXFSUUID(devPath string) error {
 	// Attempt to generate a new UUID.
 	msg, err := shared.RunCommandContext(context.TODO(), "xfs_admin", "-U", "generate", devPath)
 	if err != nil {
+		sb, err2 := os.Stat(devPath)
+		logger.Error("Failed running xfs_admin", logger.Ctx{"msg": msg, "devPath": devPath, "err": err, "sb": sb, "err2": err2})
+
+		panic("Panicking before instance is cleaned up")
 		return err
 	}
 
