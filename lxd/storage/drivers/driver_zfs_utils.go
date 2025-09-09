@@ -250,12 +250,7 @@ func (d *zfs) setBlocksize(vol Volume, size int64) error {
 		return nil
 	}
 
-	err := d.setDatasetProperties(d.dataset(vol, false), fmt.Sprintf("recordsize=%d", size))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return d.setDatasetProperties(d.dataset(vol, false), fmt.Sprintf("recordsize=%d", size))
 }
 
 func (d *zfs) getDatasetProperty(dataset string, key string) (string, error) {
