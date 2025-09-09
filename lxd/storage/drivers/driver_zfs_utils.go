@@ -356,8 +356,7 @@ func (d *zfs) sendDataset(dataset string, parent string, volSrcArgs *migration.V
 		args = append(args, "-i", parent)
 	}
 
-	args = append(args, dataset)
-	cmd := exec.Command("zfs", args...)
+	cmd := exec.Command("zfs", append(args, dataset)...)
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
