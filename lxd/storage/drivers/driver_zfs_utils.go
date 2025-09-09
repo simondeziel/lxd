@@ -76,11 +76,7 @@ func (d *zfs) createDataset(dataset string, options ...string) error {
 	args = append(args, dataset)
 
 	_, err := shared.RunCommandContext(context.TODO(), "zfs", args...)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (d *zfs) createVolume(dataset string, size int64, options ...string) error {
