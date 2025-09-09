@@ -88,11 +88,7 @@ func (d *zfs) createVolume(dataset string, size int64, options ...string) error 
 	args = append(args, dataset)
 
 	_, err := shared.RunCommandContext(context.TODO(), "zfs", args...)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (d *zfs) datasetExists(dataset string) (bool, error) {
