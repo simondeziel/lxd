@@ -507,11 +507,7 @@ func (d *zfs) randomVolumeName(vol Volume) string {
 
 func (d *zfs) delegateDataset(vol Volume, pid int) error {
 	_, err := shared.RunCommandContext(context.TODO(), "zfs", "zone", fmt.Sprintf("/proc/%d/ns/user", pid), d.dataset(vol, false))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // ZFSSupportsDelegation returns true if the ZFS version on the system supports user namespace delegation.
