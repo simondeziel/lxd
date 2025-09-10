@@ -1007,25 +1007,18 @@ func (d *ceph) parseParent(parent string) (Volume, string, error) {
 // will be split into
 // <osd-pool-name>, <prefix>, <rbd-storage-volume>.
 func (d *ceph) parseClone(clone string) (poolName string, volumeType string, volumeName string, volumeDeleted bool, err error) {
-	fields := strings.SplitN(clone, "/", 2)
-	if len(fields) != 2 {
+	poolName, volumeName, found := strings.Cut(clone, "/")
+	if !found {
 		return "", "", "", false, errors.New("Pool delimiter not found")
 	}
 
-	volumeName = fields[1]
-	poolName = fields[0]
-	volumeDeleted = strings.HasPrefix(volumeName, "zombie_")
-
 	// Strip zombie prefix.
-	volumeName = strings.TrimPrefix(volumeName, "zombie_")
+	volumeName, volumeDeleted = strings.CutPrefix(volumeName, "zombie_")
 
-	f := strings.SplitN(volumeName, "_", 2)
-	if len(f) != 2 {
+	volumeType, volumeName, found = strings.Cut(volumeName, "_")
+	if !found {
 		return "", "", "", false, errors.New("Unexpected parsing error")
 	}
-
-	volumeType = f[0]
-	volumeName = f[1]
 
 	return poolName, volumeType, volumeName, volumeDeleted, nil
 }
