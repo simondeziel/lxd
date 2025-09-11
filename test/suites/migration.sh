@@ -104,7 +104,7 @@ migration() {
   lxc_remote snapshot l1:nonlive
   lxc_remote config unset l1:nonlive user.tester
   lxc_remote move l1:nonlive l2:
-  lxc_remote config show l2:nonlive/snap0 | grep user.tester | grep foo
+  [ "$(lxc_remote config get l2:nonlive/snap0 user.tester)" = "foo" ]
 
   # This line exists so that the container's storage volume is mounted when we
   # perform existence check for various files.
