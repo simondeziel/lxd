@@ -76,7 +76,7 @@ test_migration() {
   # Test config overrides for migration of instance with snapshots
   lxc_remote network create l1:foonet ipv4.address=10.100.10.1/24
   lxc_remote network create l2:foonet2 ipv4.address=10.100.100.1/24
-  lxc_remote init --empty l1:u1
+  lxc_remote init --empty l1:u1 -d "${SMALL_ROOT_DISK}"
   lxc_remote config device add l1:u1 eth1 nic name=eth1 network=foonet ipv4.address=10.100.10.10
   lxc_remote snapshot l1:u1 snap
 
@@ -98,7 +98,8 @@ migration() {
   lxd_backend=$(storage_backend "$LXD_DIR")
   lxd2_backend=$(storage_backend "$lxd2_dir")
 
-  lxc_remote init testimage nonlive
+  # XXX: with 96MiB, resize2fs: No space left on device while trying to resize /dev/zvol/lxdtest-hNB-block-mode-ext4/containers/nonlive
+  lxc_remote init testimage nonlive -d root,size=256MiB
   # test moving snapshots
   lxc_remote config set l1:nonlive user.tester foo
   lxc_remote snapshot l1:nonlive
@@ -158,7 +159,7 @@ migration() {
   lxc_remote list l1: | grep RUNNING | grep nonlive2
   lxc_remote delete l1:nonlive2 l2:nonlive2 --force
 
-  lxc_remote launch testimage cccp
+  lxc_remote launch testimage cccp -d "${SMALL_ROOT_DISK}"
   lxc_remote copy l1:cccp l2:udssr --stateless
   lxc_remote delete l2:udssr --force
   lxc_remote copy l1:cccp l2:udssr --stateless --mode=push
@@ -168,10 +169,10 @@ migration() {
 
   lxc_remote move l1:cccp l2:udssr --stateless
   lxc_remote delete l2:udssr --force
-  lxc_remote launch testimage cccp
+  lxc_remote launch testimage cccp -d "${SMALL_ROOT_DISK}"
   lxc_remote move l1:cccp l2:udssr --stateless --mode=push
   lxc_remote delete l2:udssr --force
-  lxc_remote launch testimage cccp
+  lxc_remote launch testimage cccp -d "${SMALL_ROOT_DISK}"
   lxc_remote move l1:cccp l2:udssr --stateless --mode=relay
   lxc_remote delete l2:udssr --force
 
@@ -184,7 +185,7 @@ migration() {
   remote_pool=$(lxc_remote config profile device get l2:default root pool)
 
   # Test container only copies
-  lxc init testimage cccp
+  lxc init testimage cccp -d "${SMALL_ROOT_DISK}"
 
   lxc storage volume set "${pool}" container/cccp user.foo=snap0
   echo "before" | lxc file push - cccp/blah
@@ -236,7 +237,7 @@ migration() {
   [ "$(lxc_remote list -f csv -c S l2:udssr)" = "0" ]
   lxc_remote delete l2:udssr
 
-  lxc_remote init testimage l1:cccp
+  lxc_remote init testimage l1:cccp -d "${SMALL_ROOT_DISK}"
   lxc_remote snapshot l1:cccp
   lxc_remote snapshot l1:cccp
 
@@ -247,7 +248,7 @@ migration() {
   lxc_remote delete l2:udssr
 
   # Test container only copies
-  lxc init testimage cccp
+  lxc init testimage cccp -d "${SMALL_ROOT_DISK}"
   lxc snapshot cccp
   lxc snapshot cccp
 
@@ -260,7 +261,7 @@ migration() {
   if [ "$lxd_backend" = "zfs" ]; then
     # Test container only copies when zfs.clone_copy is set to false.
     lxc storage set "lxdtest-$(basename "${LXD_DIR}")" zfs.clone_copy false
-    lxc init testimage cccp
+    lxc init testimage cccp -d "${SMALL_ROOT_DISK}"
     lxc snapshot cccp
     lxc snapshot cccp
 
@@ -278,7 +279,7 @@ migration() {
     lxc storage unset "lxdtest-$(basename "${LXD_DIR}")" zfs.clone_copy
   fi
 
-  lxc_remote init testimage l1:c1
+  lxc_remote init testimage l1:c1 -d "${SMALL_ROOT_DISK}"
   lxc_remote copy l1:c1 l2:c2
   lxc_remote copy l1:c1 l2:c2 --refresh
 
@@ -583,7 +584,7 @@ migration() {
   lxc_remote project create l1:proj -c features.images=false -c features.profiles=false
   lxc_remote project switch l1:proj
 
-  lxc_remote init testimage l1:c1
+  lxc_remote init testimage l1:c1 -d "${SMALL_ROOT_DISK}"
   lxc_remote copy l1:c1 l2:
   lxc_remote start l2:c1
   lxc_remote delete l2:c1 -f
@@ -612,7 +613,7 @@ migration() {
   lxc_remote project delete l1:proj
 
   # Check snapshot creation dates after migration.
-  lxc_remote init testimage l1:c1
+  lxc_remote init testimage l1:c1 -d "${SMALL_ROOT_DISK}"
   lxc_remote snapshot l1:c1
   ! lxc_remote storage volume show "l1:${remote_pool1}" container/c1 | grep '^created_at: 0001-01-01T00:00:00Z' || false
   ! lxc_remote storage volume show "l1:${remote_pool1}" container/c1/snap0 | grep '^created_at: 0001-01-01T00:00:00Z' || false
@@ -623,7 +624,7 @@ migration() {
   lxc_remote delete l2:c1 -f
 
   # Check migration with invalid snapshot config (disks attached with missing source pool and source path).
-  lxc_remote init testimage l1:c1
+  lxc_remote init testimage l1:c1 -d "${SMALL_ROOT_DISK}"
   lxc_remote storage create l1:dir dir
   lxc_remote storage volume create l1:dir vol1 size=4MiB
   lxc_remote storage volume attach l1:dir vol1 c1 /mnt
@@ -641,7 +642,7 @@ migration() {
   lxc_remote storage delete l1:dir
 
   # Test optimized refresh
-  lxc_remote init testimage l1:c1
+  lxc_remote init testimage l1:c1 -d "${SMALL_ROOT_DISK}"
   echo test | lxc_remote file push - l1:c1/tmp/foo
   lxc_remote copy l1:c1 l2:c1
   lxc_remote file pull l2:c1/tmp/foo .
@@ -664,7 +665,7 @@ migration() {
   lxc_remote rm l1:c1
   lxc_remote rm l2:c1
 
-  lxc_remote init testimage l1:c1
+  lxc_remote init testimage l1:c1 -d "${SMALL_ROOT_DISK}"
   # This creates snap0
   lxc_remote snapshot l1:c1
   # This creates snap1
@@ -684,7 +685,7 @@ migration() {
 
   # In this scenario the source LXD server used to crash due to a missing slice check.
   # Let's test this to make sure it doesn't happen again.
-  lxc_remote init testimage l1:c1
+  lxc_remote init testimage l1:c1 -d "${SMALL_ROOT_DISK}"
   lxc_remote copy l1:c1 l2:c1
   lxc_remote snapshot l1:c1
   lxc_remote snapshot l1:c1
@@ -696,7 +697,7 @@ migration() {
   lxc_remote rm -f l2:c1
 
   # On btrfs, this used to cause a failure because btrfs couldn't find the parent subvolume.
-  lxc_remote init testimage l1:c1
+  lxc_remote init testimage l1:c1 -d "${SMALL_ROOT_DISK}"
   lxc_remote copy l1:c1 l2:c1
   lxc_remote snapshot l1:c1
   lxc_remote copy l1:c1 l2:c1 --refresh
@@ -707,7 +708,7 @@ migration() {
   lxc_remote rm -f l2:c1
 
   # On zfs, this used to crash due to a websocket read issue.
-  lxc launch testimage c1
+  lxc launch testimage c1 -d "${SMALL_ROOT_DISK}"
   lxc snapshot c1
   lxc copy c1 l2:c1 --stateless
   lxc copy c1 l2:c1 --stateless --refresh
@@ -730,7 +731,7 @@ migration() {
   rm -f foo.iso
 
   echo "==> Test container live migration (not supported)"
-  lxc_remote launch testimage l1:migratee -c raw.lxc=lxc.console.path=none
+  lxc_remote launch testimage l1:migratee -c raw.lxc=lxc.console.path=none -d "${SMALL_ROOT_DISK}"
 
   # Stateful stop is not supported for containers.
   ! lxc_remote stop --stateful l1:migratee || false
