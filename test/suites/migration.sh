@@ -155,7 +155,7 @@ migration() {
   lxc_remote delete l1:nobase
 
   lxc_remote start l1:nonlive2
-  lxc_remote list l1: | grep RUNNING | grep nonlive2
+  lxc_remote list l1: | grep -wF RUNNING | grep -wF nonlive2
   lxc_remote delete l1:nonlive2 l2:nonlive2 --force
 
   lxc_remote launch testimage cccp
@@ -176,7 +176,7 @@ migration() {
   lxc_remote delete l2:udssr --force
 
   lxc_remote start l2:nonlive
-  lxc_remote list l2: | grep RUNNING | grep nonlive
+  lxc_remote list l2: | grep -wF RUNNING | grep -wF nonlive
   lxc_remote delete l2:nonlive --force
 
   # Get container's pool.
@@ -636,7 +636,7 @@ migration() {
   lxc_remote config device remove c1 vol2
   rmdir "$LXD_DIR/testvol2"
   lxc_remote copy l1:c1 l2:
-  lxc_remote info l2:c1 | grep snap0
+  lxc_remote info l2:c1 | grep -wF snap0
   lxc_remote delete l1:c1 -f
   lxc_remote delete l2:c1 -f
   lxc_remote storage volume delete l1:dir vol1
