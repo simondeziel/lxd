@@ -187,7 +187,7 @@ test_image_import_dir() {
 
 test_image_import_existing_alias() {
     ensure_import_testimage
-    lxc init testimage c
+    lxc init testimage c -d "${SMALL_ROOT_DISK}"
     lxc publish c --alias newimage --alias image2
     lxc delete c
     lxc image export testimage testimage.file
@@ -224,13 +224,13 @@ test_image_refresh() {
   lxc image rm testimage
 
   # Create container from published image
-  lxc init l2:testimage c1
+  lxc init l2:testimage c1 -d "${SMALL_ROOT_DISK}"
 
   # Create an alias for the received image
   lxc image alias create testimage "${fp}"
 
   # Change image and publish it
-  lxc init l2:testimage l2:c1
+  lxc init l2:testimage l2:c1 -d "${SMALL_ROOT_DISK}"
   echo test | lxc file push - l2:c1/tmp/testfile
   lxc publish l2:c1 l2: --alias testimage --reuse --public
   new_fp="$(lxc image info l2:testimage | awk '/Fingerprint: / {print $2}')"
