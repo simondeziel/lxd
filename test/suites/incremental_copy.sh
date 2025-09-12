@@ -19,7 +19,7 @@ do_copy() {
     source_pool=$(lxc profile device get default root pool)
   fi
 
-  lxc init testimage c1 -s "${source_pool}"
+  lxc init testimage c1 -s "${source_pool}" -d "${SMALL_ROOT_DISK}"
   lxc storage volume set "${source_pool}" container/c1 user.foo=main
 
   # Set size to check this is supported during copy.
