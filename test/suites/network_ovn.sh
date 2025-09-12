@@ -121,16 +121,16 @@ test_network_ovn() {
   lxc network load-balancer delete "${ovn_network}" 2001:db8:1:2::10
 
   echo "Check that instance NIC passthrough with ipv4.routes.external does not allow using IPs from OVN range."
-  ! lxc launch testimage c1 -n "${ovn_network}" -d eth0,ipv4.routes.external=192.0.2.100/32 || false
+  ! lxc launch testimage c1 -n "${ovn_network}" -d "${SMALL_ROOT_DISK}" -d eth0,ipv4.routes.external=192.0.2.100/32 || false
 
   echo "Check that instance NIC passthrough with ipv6.routes.external does not allow using IPs from OVN range."
-  ! lxc launch testimage c2 -n "${ovn_network}" -d eth0,ipv6.routes.external=2001:db8:1:2::100/128 || false
+  ! lxc launch testimage c2 -n "${ovn_network}" -d "${SMALL_ROOT_DISK}" -d eth0,ipv6.routes.external=2001:db8:1:2::100/128 || false
 
   echo "Check that instance NIC passthrough with ipv4.routes.external allows using IPs outside of OVN ranges but on the same network."
-  lxc launch testimage c1 -n "${ovn_network}" -d eth0,ipv4.routes.external=192.0.2.10/32
+  lxc launch testimage c1 -n "${ovn_network}" -d "${SMALL_ROOT_DISK}" -d eth0,ipv4.routes.external=192.0.2.10/32
 
   echo "Check that instance NIC passthrough with ipv6.routes.external allows using IPs outside of OVN ranges but on the same network."
-  lxc launch testimage c2 -n "${ovn_network}" -d eth0,ipv6.routes.external=2001:db8:1:2::10/128
+  lxc launch testimage c2 -n "${ovn_network}" -d "${SMALL_ROOT_DISK}" -d eth0,ipv6.routes.external=2001:db8:1:2::10/128
 
   echo "Clean up instances."
   lxc delete c1 --force
@@ -315,7 +315,7 @@ test_network_ovn() {
   ! lxc network set "${ovn_network}" volatile.network.ipv6.address=fd42:4242:4242:1010::199 || false
 
   echo "Launch an instance on the OVN network and assert configuration changes."
-  lxc launch testimage c1 --network "${ovn_network}"
+  lxc launch testimage c1 --network "${ovn_network}" -d "${SMALL_ROOT_DISK}"
 
   # Check that this created the expected number of entries.
   tables["DNS"]=$((tables["DNS"]+1))
@@ -541,10 +541,10 @@ test_network_ovn() {
   lxc delete c1 --force
 
   echo "Check that instance NIC passthrough with ipv4.routes.external does not allow using volatile.network.ipv4.address."
-  ! lxc launch testimage c1 -n "${ovn_network}" -d eth0,ipv4.routes.external="${volatile_ip4}/32" || false
+  ! lxc launch testimage c1 -n "${ovn_network}" -d "${SMALL_ROOT_DISK}" -d eth0,ipv4.routes.external="${volatile_ip4}/32" || false
 
   echo "Check that instance NIC passthrough with ipv6.routes.external does not allow using volatile.network.ipv6.address."
-  ! lxc launch testimage c1 -n "${ovn_network}" -d eth0,ipv6.routes.external="${volatile_ip6}/128" || false
+  ! lxc launch testimage c1 -n "${ovn_network}" -d "${SMALL_ROOT_DISK}" -d eth0,ipv6.routes.external="${volatile_ip6}/128" || false
 
   echo "Test DHCP reservation."
 
