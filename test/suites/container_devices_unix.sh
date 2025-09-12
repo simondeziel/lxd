@@ -41,7 +41,7 @@ _container_devices_unix() {
   fi
 
   ctName="ct$$"
-  lxc launch testimage "${ctName}"
+  lxc launch testimage "${ctName}" -d "${SMALL_ROOT_DISK}"
 
   # Create a test unix device.
   testDev="${TEST_DIR}"/dev/testdev-"${ctName}"
@@ -156,9 +156,9 @@ _container_devices_unix() {
   lxc delete -f "${ctName}"
 
   # Check multiple instances sharing same watcher.
-  lxc launch testimage "${ctName}1"
+  lxc launch testimage "${ctName}1" -d "${SMALL_ROOT_DISK}"
   lxc config device add "${ctName}1" test-dev-dynamic "${deviceType}" required=false source="${testDev}" path=/tmp/testdev1
-  lxc launch testimage "${ctName}2"
+  lxc launch testimage "${ctName}2" -d "${SMALL_ROOT_DISK}"
   lxc config device add "${ctName}2" test-dev-dynamic "${deviceType}" required=false source="${testDev}" path=/tmp/testdev2
   mknod "${testDev}" "${deviceTypeCode}" 0 0
   sleep 2
