@@ -26,8 +26,8 @@ test_network_zone() {
     -c restricted.networks.zones=example.net
 
   # Put an instance on the network in each project.
-  lxc init testimage c1 --network "${netName}" -d eth0,ipv4.address=192.0.2.42
-  lxc init testimage c2 --network "${netName}" --storage "${poolName}" -d eth0,ipv4.address=192.0.2.43 --project foo
+  lxc init testimage c1 --network "${netName}" -d "${SMALL_ROOT_DISK}" -d eth0,ipv4.address=192.0.2.42
+  lxc init testimage c2 --network "${netName}" -d "${SMALL_ROOT_DISK}" --storage "${poolName}" -d eth0,ipv4.address=192.0.2.43 --project foo
 
   # Check features.networks.zones can be enabled if false in a non-empty project, but cannot be disabled again.
   lxc project set foo features.networks.zones=true
