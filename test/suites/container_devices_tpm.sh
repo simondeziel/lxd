@@ -11,7 +11,7 @@ test_container_devices_tpm() {
 
   ensure_import_testimage
   ctName="ct$$"
-  lxc launch testimage "${ctName}"
+  lxc launch testimage "${ctName}" -d "${SMALL_ROOT_DISK}"
 
   # Check adding a device with no path
   ! lxc config device add "${ctName}" test-dev-invalid tpm || false
