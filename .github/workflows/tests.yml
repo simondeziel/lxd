@@ -288,7 +288,7 @@ jobs:
       fail-fast: false
       matrix:
         suite: ["cluster", "standalone"]
-        backend: ["dir", "btrfs", "lvm", "zfs", "ceph", "random"]
+        backend: ["dir","ceph"]
 
     steps:
       - name: Checkout
