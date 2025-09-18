@@ -421,6 +421,7 @@ if [ "${1:-"all"}" != "standalone" ]; then
 fi
 
 if [ "${1:-"all"}" != "cluster" ]; then
+    run_test test_vm_empty "Empty VM"
     run_test test_concurrent "concurrent startup"
     run_test test_concurrent_exec "concurrent exec"
     run_test test_database_restore "database restore"
@@ -440,7 +441,6 @@ if [ "${1:-"all"}" != "cluster" ]; then
     run_test test_remote_url_with_token "remote token handling"
     run_test test_remote_admin "remote administration"
     run_test test_remote_usage "remote usage"
-    run_test test_vm_empty "Empty VM"
     run_test test_projects_default "default project"
     run_test test_projects_copy "copy/move between projects"
     run_test test_projects_crud "projects CRUD operations"
