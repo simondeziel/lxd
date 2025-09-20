@@ -233,11 +233,11 @@ tics: deps
 .PHONY: check-gomin
 check-gomin:
 	go mod tidy -go=$(GOMIN)
-	@# Check the doc mentions the right GOMIN
+	@echo "Check the doc mentions the right Go minimum version"
 	$(eval DOC_GOMIN := $(shell sed -n 's/^LXD requires Go \([0-9.]\+\) .*/\1/p' doc/requirements.md))
 	@if [ "$(DOC_GOMIN)" != "$(GOMIN)" ]; then \
 		echo "Please update the Go version in 'doc/requirements.md' to be $(GOMIN) instead of $(DOC_GOMIN)"; \
-		exit 1;\
+		exit 1; \
 	fi
 
 .PHONY: update-gomod
