@@ -262,11 +262,11 @@ endif
 	go get toolchain@none
 
 	@echo "Dependencies updated"
-	if [ -t 0 ] && ! git diff --quiet -- ./go.mod ./go.sum; then \
+	@if [ -t 0 ] && ! git diff --quiet -- ./go.mod ./go.sum; then \
 		read -rp "Would you like to commit gomod changes (Y/n)? " answer; \
 		if [ "$${answer:-y}" = "y" ] || [ "$${answer:-y}" = "Y" ]; then \
-			git commit -S -sm "gomod: Update dependencies" -- ./go.mod ./go.sum;\
-		fi;\
+			git commit -S -sm "gomod: Update dependencies" -- ./go.mod ./go.sum; \
+		fi; \
 	fi
 
 
@@ -291,22 +291,22 @@ endif
 	@# Generate spec and exclude package from dependency which causes a 'classifier: unknown swagger annotation "extendee"' error.
 	@# For more details see: https://github.com/go-swagger/go-swagger/issues/2917.
 	swagger generate spec -o doc/rest-api.yaml -w ./lxd -m -x github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options
-	if [ -t 0 ] && ! git diff --quiet -- ./doc/rest-api.yaml; then \
+	@if [ -t 0 ] && ! git diff --quiet -- ./doc/rest-api.yaml; then \
 		read -rp "Would you like to commit swagger YAML changes (Y/n)? " answer; \
 		if [ "$${answer:-y}" = "y" ] || [ "$${answer:-y}" = "Y" ]; then \
-			git commit -S -sm "doc/rest-api: Refresh swagger YAML" -- ./doc/rest-api.yaml;\
-		fi;\
+			git commit -S -sm "doc/rest-api: Refresh swagger YAML" -- ./doc/rest-api.yaml; \
+		fi; \
 	fi
 
 .PHONY: update-metadata
 update-metadata: build
 	@echo "Generating golang documentation metadata"
 	$(GOPATH)/bin/lxd-metadata . --json ./lxd/metadata/configuration.json --txt ./doc/metadata.txt --substitution-db ./doc/substitutions.yaml
-	if [ -t 0 ] && ! git diff --quiet -- ./lxd/metadata/configuration.json ./doc/metadata.txt; then \
+	@if [ -t 0 ] && ! git diff --quiet -- ./lxd/metadata/configuration.json ./doc/metadata.txt; then \
 		read -rp "Would you like to commit metadata changes (Y/n)? " answer; \
 		if [ "$${answer:-y}" = "y" ] || [ "$${answer:-y}" = "Y" ]; then \
-			git commit -S -sm "doc: Update metadata" -- ./lxd/metadata/configuration.json ./doc/metadata.txt;\
-		fi;\
+			git commit -S -sm "doc: Update metadata" -- ./lxd/metadata/configuration.json ./doc/metadata.txt; \
+		fi; \
 	fi
 
 .PHONY: update-godeps
@@ -372,7 +372,7 @@ dist:
 	# Do not build doc on `make dist` on GH PRs
 	if [ "$(GITHUB_EVENT_NAME)" = "pull_request" ]; then \
 		echo "Skipping doc generation for 'make dist' on pull_request event"; \
-	else \
+	else; \
 		$(MAKE) doc; \
 		cp -r --preserve=mode doc/_build $(TMP)/lxd-$(VERSION)/doc/html/; \
 	fi
@@ -414,7 +414,7 @@ update-po:
 	for lang in $(LINGUAS); do \
 		msgmerge --silent --backup=none -U $$lang.po po/$(DOMAIN).pot; \
 	done; \
-	if [ -t 0 ] && ! git diff --quiet -- po/*.po; then \
+	@if [ -t 0 ] && ! git diff --quiet -- po/*.po; then \
 		read -rp "Would you like to commit i18n changes (Y/n)? " answer; \
 			if [ "$${answer:-y}" = "y" ] || [ "$${answer:-y}" = "Y" ]; then \
 				git commit -S -sm "i18n: Update translations." -- po/*.po; \
@@ -427,8 +427,8 @@ ifeq "$(LXD_OFFLINE)" ""
 	(cd / ; go install github.com/snapcore/snapd/i18n/xgettext-go@2.57.1)
 endif
 	xgettext-go -o po/$(DOMAIN).pot --add-comments-tag=TRANSLATORS: --sort-output --package-name=$(DOMAIN) --msgid-bugs-address=lxd@lists.canonical.com --keyword=i18n.G --keyword-plural=i18n.NG lxc/*.go lxc/*/*.go
-	if git diff --quiet --ignore-matching-lines='^\s*"POT-Creation-Date: .*\n"' -- po/*.pot; then git checkout -- po/*.pot; fi
-	if [ -t 0 ] && ! git diff --quiet --ignore-matching-lines='^\s*"POT-Creation-Date: .*\n"' -- po/*.pot; then \
+	@if git diff --quiet --ignore-matching-lines='^\s*"POT-Creation-Date: .*\n"' -- po/*.pot; then git checkout -- po/*.pot; fi
+	@if [ -t 0 ] && ! git diff --quiet --ignore-matching-lines='^\s*"POT-Creation-Date: .*\n"' -- po/*.pot; then \
 		read -rp "Would you like to commit i18n template changes (Y/n)? " answer; \
 			if [ "$${answer:-y}" = "y" ] || [ "$${answer:-y}" = "Y" ]; then \
 				git commit -S -sm "i18n: Update translation templates." -- po/*.pot; \
@@ -462,14 +462,14 @@ ifeq ($(shell command -v shellcheck),)
 	exit 1
 else
 endif
-	echo "Verify test/lint files are properly named and executable"
+	@echo "Verify test/lint files are properly named and executable"
 	@NOT_EXEC="$(shell find test/lint -type f -not -executable)"; \
-	if [ -n "$$NOT_EXEC" ]; then \
+	@if [ -n "$$NOT_EXEC" ]; then \
 		echo "lint scripts not executable: $$NOT_EXEC"; \
 		exit 1; \
 	fi
 	@BAD_NAME="$(shell find test/lint -type f -not -name '*.sh')"; \
-	if [ -n "$$BAD_NAME" ]; then \
+	@if [ -n "$$BAD_NAME" ]; then \
 		echo "lint scripts missing .sh extension: $$BAD_NAME"; \
 		exit 1; \
 	fi
@@ -478,11 +478,11 @@ endif
 .PHONY: update-auth
 update-auth:
 	go generate ./lxd/auth
-	if [ -t 0 ] && ! git diff --quiet -- ./lxd/auth/; then \
+	@if [ -t 0 ] && ! git diff --quiet -- ./lxd/auth/; then \
 		read -rp "Would you like to commit auth changes (Y/n)? " answer; \
 		if [ "$${answer:-y}" = "y" ] || [ "$${answer:-y}" = "Y" ]; then \
-			git commit -S -sm "lxd/auth: Update auth" -- ./lxd/auth/;\
-		fi;\
+			git commit -S -sm "lxd/auth: Update auth" -- ./lxd/auth/; \
+		fi; \
 	fi
 
 .PHONY: update-fmt
