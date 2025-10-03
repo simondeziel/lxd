@@ -204,10 +204,14 @@ cleanup() {
 
     [ -e "${LXD_TEST_IMAGE:-}" ] && rm "${LXD_TEST_IMAGE}"
 
-    kill_oidc
-    clear_ovn_nb_db
-    mountpoint -q "${TEST_DIR}/dev" && umount -l "${TEST_DIR}/dev"
-    cleanup_lxds "$TEST_DIR"
+    if [ "${LXD_SNAP_TESTS:-0}" = "0" ]; then
+      kill_oidc
+      clear_ovn_nb_db
+      mountpoint -q "${TEST_DIR}/dev" && umount -l "${TEST_DIR}/dev"
+      cleanup_lxds "${TEST_DIR}"
+    else
+      snap remove --purge lxd
+    fi
 
     mountpoint -q "${TEST_DIR}" && umount -l "${TEST_DIR}"
     rm -rf "${TEST_DIR}"
@@ -321,19 +325,25 @@ if [ "${LXD_TMPFS:-0}" = "1" ]; then
   mount -t tmpfs tmpfs "${TEST_DIR}" -o mode=0751 -o size=7G
 fi
 
-mkdir -p "${TEST_DIR}/dev"
-mount -t tmpfs none "${TEST_DIR}"/dev
-export LXD_DEVMONITOR_DIR="${TEST_DIR}/dev"
+# For snap-based tests
+if [ "${LXD_SNAP_TESTS:-0}" = "0" ]; then
+  mkdir -p "${TEST_DIR}/dev"
+  mount -t tmpfs none "${TEST_DIR}"/dev
+  export LXD_DEVMONITOR_DIR="${TEST_DIR}/dev"
 
-LXD_CONF=$(mktemp -d -p "${TEST_DIR}" XXX)
-export LXD_CONF
+  LXD_CONF=$(mktemp -d -p "${TEST_DIR}" XXX)
+  export LXD_CONF
 
-LXD_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-export LXD_DIR
-chmod +x "${LXD_DIR}"
-spawn_lxd "${LXD_DIR}" true
-LXD_ADDR=$(< "${LXD_DIR}/lxd.addr")
-export LXD_ADDR
+  LXD_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
+  export LXD_DIR
+  chmod +x "${LXD_DIR}"
+  spawn_lxd "${LXD_DIR}" true
+  LXD_ADDR=$(< "${LXD_DIR}/lxd.addr")
+  export LXD_ADDR
+else
+  # For snap-based tests, install the snap and sideload the relevant binaries
+  sideload_lxd_snap
+fi
 
 export LXD_SKIP_TESTS="${LXD_SKIP_TESTS:-}"
 
