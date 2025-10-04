@@ -332,8 +332,13 @@ if [ "${LXD_TMPFS:-0}" = "1" ]; then
   mount -t tmpfs tmpfs "${TEST_DIR}" -o mode=0751 -o size=7G
 fi
 
-# For snap-based tests
+# The initial setup differs based on whether we are doing snap-based tests or not.
 if [ "${LXD_SNAP_TESTS:-0}" = "0" ]; then
+  # Ensure no LXD snap gets in the way
+  if [ -e /snap/lxd/current ]; then
+    snap disable lxd
+  fi
+
   mkdir -p "${TEST_DIR}/dev"
   mount -t tmpfs none "${TEST_DIR}"/dev
   export LXD_DEVMONITOR_DIR="${TEST_DIR}/dev"
@@ -348,8 +353,21 @@ if [ "${LXD_SNAP_TESTS:-0}" = "0" ]; then
   LXD_ADDR=$(< "${LXD_DIR}/lxd.addr")
   export LXD_ADDR
 else
-  # For snap-based tests, install the snap and sideload the relevant binaries
-  sideload_lxd_snap
+  # Ensure LXD_DIR always points to the snap common dir
+  LXD_DIR="/var/snap/lxd/common/lxd"
+  export LXD_DIR
+
+  # For snap based tests, the lxc and lxc_remote functions MUST not be used
+  unset -f lxc lxc_remote
+
+  # Install the snap and sideload the binaries
+  if ! [ -e /var/snap/lxd/common/lxd.debug ]; then
+    sideload_lxd_snap
+    spawn_lxd_snap "${LXD_DIR}" true
+  fi
+
+  LXD_ADDR="127.0.0.1:8443"
+  export LXD_ADDR
 fi
 
 export LXD_SKIP_TESTS="${LXD_SKIP_TESTS:-}"
