@@ -1,5 +1,57 @@
 # LXD-related test helpers.
 
+spawn_lxd_snap() {
+    { set +x; } 2>/dev/null
+    local lxddir storage lxd_backend
+
+    lxddir=${1}
+    shift
+    storage=${1}
+    shift
+
+    # shellcheck disable=SC2153
+    if [ "$LXD_BACKEND" = "random" ]; then
+        lxd_backend="$(random_storage_backend)"
+    else
+        lxd_backend="$LXD_BACKEND"
+    fi
+
+    if [ "${LXD_BACKEND}" = "ceph" ] && [ -z "${LXD_CEPH_CLUSTER:-}" ]; then
+        echo "A cluster name must be specified when using the CEPH driver." >&2
+        exit 1
+    fi
+
+    # Override LXD_DIR for the snap
+    lxddir="${LXD_DIR}"
+
+    # setup storage
+    "$lxd_backend"_setup "${lxddir}" "${lxd_backend}-snap"
+
+    echo "==> Starting lxd snap"
+
+    # Set ulimit to ensure core dump is outputted.
+    ulimit -c unlimited
+
+    systemctl start snap.lxd.daemon.service
+
+    echo "==> Confirming lxd snap is responsive"
+    lxd waitready --timeout=300
+
+    lxc config set core.https_address "127.0.0.1:8443"
+
+    if [ -n "${SHELL_TRACING:-}" ]; then
+        set -x
+    fi
+
+    echo "==> Setting up networking"
+    lxc profile device add default eth0 nic nictype=p2p name=eth0
+
+    if [ "${storage}" = true ]; then
+        echo "==> Configuring storage backend"
+        "$lxd_backend"_configure "${lxddir}" "${lxd_backend}-snap"
+    fi
+}
+
 spawn_lxd() {
     { set +x; } 2>/dev/null
     # LXD_DIR is local here because since $(lxc) is actually a function, it
