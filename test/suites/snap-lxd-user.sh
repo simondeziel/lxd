@@ -1,0 +1,18 @@
+#
+lxc_user() {
+    sudo -Hu testuser LXD_DIR=/var/snap/lxd/common/lxd-user lxc "${@}"
+}
+
+test_snap_lxd_user() {
+  # Create testuser account
+  useradd -m testuser -G lxd --uid 5000
+
+  # Access lxd-user
+  lxc_user info
+  lxc_user project list
+  lxc_user project list -f csv | grep '^user-5000.*,"User restricted project for ""testuser"" (5000)",'
+
+  # Cleanup
+  lxc project delete user-5000
+  userdel -r testuser 2>/dev/null || true
+}
