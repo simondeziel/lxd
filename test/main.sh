@@ -255,6 +255,13 @@ run_test() {
   TEST_UNMET_REQUIREMENT=""
   cwd="${PWD}"
 
+  # preflight checks
+  if [ "${LXD_SNAP_TESTS:-0}" = "0" ]; then
+    [[ ! "${TEST_CURRENT}" =~ ^test_snap_.*$ ]]
+  else
+    [[ "${TEST_CURRENT}" =~ ^test_snap_.*$ ]]
+  fi
+
   if [ "${RUN_COUNT:-0}" -ne 0 ] && [ "${LXD_REPEAT_TESTS:-1}" -ne 1 ]; then
     TEST_CURRENT_DESCRIPTION="${TEST_CURRENT_DESCRIPTION} (${RUN_COUNT}/${LXD_REPEAT_TESTS})"
   fi
