@@ -39,6 +39,10 @@ runs:
       run: |
           set -eux
 
+          # The lxd snap preinstalled on 22.04 holds on to the swap which
+          # prevents repurposing the ephemeral disk for use by microceph
+          sudo snap remove --purge lxd || true
+
           sudo swapoff /mnt/swapfile
           ephemeral_disk="$(findmnt --noheadings --output SOURCE --target /mnt | sed 's/[0-9]\+$//')"
           sudo umount /mnt
