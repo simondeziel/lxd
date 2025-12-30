@@ -25,6 +25,7 @@ teardown_clustering_bridge() {
 
 setup_clustering_netns() {
   local id="${1}"
+  # shellcheck disable=SC2154
   local ns="${prefix}${id}"
 
   echo "==> Setup clustering netns ${ns}"
