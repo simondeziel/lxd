@@ -1772,18 +1772,9 @@ test_clustering_update_cert() {
 }
 
 test_clustering_update_cert_reversion() {
-  local LXD_DIR
+  spawn_lxd_and_bootstrap_cluster
 
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  # Bootstrap a node to steal its certs
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
-
+  local cert_path key_path
   cert_path=$(mktemp -p "${TEST_DIR}" XXX)
   key_path=$(mktemp -p "${TEST_DIR}" XXX)
 
