@@ -196,8 +196,6 @@ cluster:
 }
 
 spawn_lxd_and_join_cluster() {
-  local LXD_NETNS
-
   ns="${1}"
   bridge="${2}"
   cert="${3}"
