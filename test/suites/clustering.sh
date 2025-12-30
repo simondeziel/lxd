@@ -4745,17 +4745,7 @@ test_clustering_uuid() {
 }
 
 test_clustering_trust_add() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  # create two cluster nodes
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
 
@@ -4937,17 +4927,8 @@ test_clustering_projects_force_delete() {
 }
 
 test_clustering_placement_groups() {
-  local LXD_DIR
-
   echo "Create cluster with 5 members."
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
