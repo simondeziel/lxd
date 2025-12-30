@@ -1860,6 +1860,8 @@ test_clustering_update_cert() {
   LXD_DIR="${LXD_ONE_DIR}" lxc info --target node2 | grep -F "server_name: node2"
   LXD_DIR="${LXD_TWO_DIR}" lxc info --target node1 | grep -F "server_name: node1"
 
+  rm "${cert_path}" "${key_path}"
+
   LXD_DIR="${LXD_TWO_DIR}" lxd shutdown
   LXD_DIR="${LXD_ONE_DIR}" lxd shutdown
   sleep 0.5
