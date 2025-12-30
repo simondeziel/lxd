@@ -3146,22 +3146,13 @@ test_clustering_failure_domains() {
 }
 
 test_clustering_image_refresh() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
   # The random storage backend is not supported in clustering tests,
   # since we need to have the same storage driver on all nodes, so use the driver chosen for the standalone pool.
   local poolDriver
   poolDriver="$(storage_backend "$LXD_INITIAL_DIR")"
 
   # Spawn first node
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}" "${poolDriver}"
+  spawn_lxd_and_bootstrap_cluster "${poolDriver}"
 
   LXD_DIR="${LXD_ONE_DIR}" lxc config set cluster.images_minimal_replica 1
   LXD_DIR="${LXD_ONE_DIR}" lxc config set images.auto_update_interval 1
