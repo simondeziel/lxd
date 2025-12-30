@@ -3977,17 +3977,8 @@ test_clustering_edit_configuration() {
 }
 
 test_clustering_remove_members() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
   # Bootstrap the first node
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -4091,7 +4082,6 @@ test_clustering_remove_members() {
   rm -f "${LXD_FIVE_DIR}/unix.socket"
   rm -f "${LXD_SIX_DIR}/unix.socket"
   rm -f "${LXD_SEVEN_DIR}/unix.socket"
-
 
   teardown_clustering_netns
   teardown_clustering_bridge
