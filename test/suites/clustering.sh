@@ -174,16 +174,7 @@ test_clustering_enable() {
 }
 
 test_clustering_membership() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -375,17 +366,8 @@ test_clustering_membership() {
 }
 
 test_clustering_containers() {
-  local LXD_DIR
-
   echo "Create cluster with 3 nodes."
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -546,21 +528,12 @@ test_clustering_containers() {
 }
 
 test_clustering_storage() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
   # The random storage backend is not supported in clustering tests,
   # since we need to have the same storage driver on all nodes, so use the driver chosen for the standalone pool.
   local poolDriver
   poolDriver="$(storage_backend "${LXD_INITIAL_DIR}")"
 
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}" "${poolDriver}"
+  spawn_lxd_and_bootstrap_cluster "${poolDriver}"
 
   # The state of the preseeded storage pool shows up as CREATED
   LXD_DIR="${LXD_ONE_DIR}" lxc storage list | grep -wF data | grep -wF CREATED
@@ -1016,21 +989,12 @@ test_clustering_storage() {
 # two-stage process required multi-node clusters, or directly with the normal
 # procedure for non-clustered daemons.
 test_clustering_storage_single_node() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
   # The random storage backend is not supported in clustering tests,
   # since we need to have the same storage driver on all nodes, so use the driver chosen for the standalone pool.
   local poolDriver
   poolDriver="$(storage_backend "${LXD_INITIAL_DIR}")"
 
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}" "${poolDriver}"
+  spawn_lxd_and_bootstrap_cluster "${poolDriver}"
 
   # Create a pending storage pool on the node.
   driver_config=""
@@ -1088,16 +1052,7 @@ test_clustering_storage_single_node() {
 }
 
 test_clustering_network() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # The state of the preseeded network shows up as CREATED
   LXD_DIR="${LXD_ONE_DIR}" lxc network list | grep -F "${bridge}" | grep -wF CREATED
@@ -1347,17 +1302,9 @@ test_clustering_network() {
 test_clustering_heal_networks_stop() {
   echo "==> Test: cluster healing does not shut down networks on the leader node when evacuating an offline member"
   # Regression test for https://github.com/canonical/lxd/issues/16642.
-  local LXD_DIR
 
   echo "Create a cluster with 3 nodes"
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -1448,17 +1395,7 @@ test_clustering_heal_networks_stop() {
 # Perform an upgrade of a 2-member cluster, then a join a third member and
 # perform one more upgrade
 test_clustering_upgrade() {
-  local LXD_DIR LXD_NETNS
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  # First, test the upgrade with a 2-node cluster
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -1540,17 +1477,7 @@ test_clustering_upgrade() {
 
 # Perform a downgrade of a 2-member cluster, then a join a third member and perform one more downgrade.
 test_clustering_downgrade() {
-  local LXD_DIR LXD_NETNS
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  # First, test the upgrade with a 2-node cluster.
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -1680,16 +1607,7 @@ test_clustering_upgrade_large() {
 }
 
 test_clustering_publish() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -1729,16 +1647,7 @@ test_clustering_publish() {
 }
 
 test_clustering_profiles() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -1801,17 +1710,7 @@ EOF
 }
 
 test_clustering_update_cert() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  # Bootstrap a node to steal its certs
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   cert_path=$(mktemp -p "${TEST_DIR}" XXX)
   key_path=$(mktemp -p "${TEST_DIR}" XXX)
@@ -1829,13 +1728,8 @@ test_clustering_update_cert() {
   kill_lxd "${LXD_ONE_DIR}"
 
   # Set up again
-  setup_clustering_bridge
-
   # Bootstrap the first node
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  LXD_DIR_KEEP=true spawn_lxd_and_bootstrap_cluster
 
   # quick check
   ! cmp -s "${LXD_ONE_DIR}/cluster.crt" "${cert_path}" || false
@@ -4121,17 +4015,7 @@ test_clustering_evacuation_restore_operations() {
 }
 
 test_clustering_edit_configuration() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  # Bootstrap the first node
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
