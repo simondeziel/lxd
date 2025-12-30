@@ -5668,7 +5668,7 @@ test_clustering_recovery() {
   spawn_lxd_and_join_cluster "${ns3}" "${bridge}" "${cert}" 3 1 "${LXD_THREE_DIR}" "${LXD_ONE_DIR}" "${pool_driver}" 8443 "${source}"
 
   # Create an instance and custom volume on the third node's data pool.
-  ensure_import_testimage
+  LXD_DIR="${LXD_ONE_DIR}" ensure_import_testimage
   LXD_DIR="${LXD_ONE_DIR}" lxc init testimage c1 -s data --target node3
   LXD_DIR="${LXD_ONE_DIR}" lxc storage volume create data vol1 --target node3 size=32MiB
 
