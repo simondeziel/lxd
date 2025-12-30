@@ -321,6 +321,7 @@ cleanup() {
 
 # Must be set before cleanup()
 TEST_CURRENT=setup
+TEST_CURRENT_DESCRIPTION="setup"
 # shellcheck disable=SC2034
 TEST_RESULT=failure
 
@@ -568,6 +569,7 @@ if [ "${1:-"all"}" = "test-shell" ]; then
   spawn_initial_lxd
   bash --rcfile test-shell.bashrc || true
   TEST_CURRENT="test-shell"
+  TEST_CURRENT_DESCRIPTION="test-shell"
   TEST_RESULT=success
   exit 0
 fi
