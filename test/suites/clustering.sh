@@ -3154,8 +3154,7 @@ test_clustering_image_refresh() {
   # Spawn first node
   spawn_lxd_and_bootstrap_cluster "${poolDriver}"
 
-  LXD_DIR="${LXD_ONE_DIR}" lxc config set cluster.images_minimal_replica 1
-  LXD_DIR="${LXD_ONE_DIR}" lxc config set images.auto_update_interval 1
+  LXD_DIR="${LXD_ONE_DIR}" lxc config set cluster.images_minimal_replica=1 images.auto_update_interval=1
 
   # The state of the preseeded storage pool shows up as CREATED
   LXD_DIR="${LXD_ONE_DIR}" lxc storage list | grep -wF data | grep -wF CREATED
