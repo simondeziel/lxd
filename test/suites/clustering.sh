@@ -1554,20 +1554,13 @@ test_clustering_downgrade() {
 
 # Perform an upgrade of an 8-member cluster.
 test_clustering_upgrade_large() {
-  local LXD_DIR LXD_NETNS N
+  local N=8
+  local LXD_CLUSTER_DIR
+  LXD_CLUSTER_DIR="$(mktemp -d -p "${TEST_DIR}" XXX)"
 
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  LXD_CLUSTER_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  N=8
-
-  setup_clustering_netns 1
   LXD_ONE_DIR="${LXD_CLUSTER_DIR}/1"
-  mkdir -p "${LXD_ONE_DIR}"
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  mkdir "${LXD_ONE_DIR}"
+  LXD_DIR_KEEP=true spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
