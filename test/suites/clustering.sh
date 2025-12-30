@@ -3069,16 +3069,7 @@ test_clustering_remove_raft_node() {
 }
 
 test_clustering_failure_domains() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -3410,12 +3401,7 @@ test_clustering_image_refresh() {
 }
 
 test_clustering_evacuation() {
-  local LXD_DIR
-
   echo "Create cluster with 3 nodes"
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
 
   # The random storage backend is not supported in clustering tests,
   # since we need to have the same storage driver on all nodes, so use the driver chosen for the standalone pool.
@@ -3423,10 +3409,7 @@ test_clustering_evacuation() {
   poolDriver="$(storage_backend "$LXD_INITIAL_DIR")"
 
   # Spawn first node
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}" "${poolDriver}"
+  spawn_lxd_and_bootstrap_cluster "${poolDriver}"
 
   echo "Check the state of the preseeded storage pool shows up as CREATED"
   LXD_DIR="${LXD_ONE_DIR}" lxc storage list | grep -wF data | grep -wF CREATED
@@ -4656,16 +4639,7 @@ test_clustering_events() {
 }
 
 test_clustering_roles() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
