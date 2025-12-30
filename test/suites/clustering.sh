@@ -2406,7 +2406,7 @@ test_clustering_dns() {
   forkdns_pid2=$!
 
   # Let the processes come up
-  sleep 1
+  sleep 0.1
 
   # Create servers list file for forkdns1 pointing at forkdns2 (should be live reloaded)
   echo "127.0.1.2${ipRand}" > "${LXD_DIR}"/networks/lxdtest1/forkdns.servers/servers.conf.tmp
