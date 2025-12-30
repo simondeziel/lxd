@@ -2597,7 +2597,6 @@ test_clustering_recover() {
 # the cluster, filter out some bogus/spam/malicious requests without terminating
 # TLS and while preserving the original client IP addresses.
 test_clustering_ha() {
-  local LXD_DIR
   local successes
   local failures
   local FOUND_RADOSGW
@@ -2609,14 +2608,7 @@ test_clustering_ha() {
     microceph disable rgw
   fi
 
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
