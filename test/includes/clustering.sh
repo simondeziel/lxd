@@ -112,7 +112,12 @@ spawn_lxd_and_bootstrap_cluster() {
   setup_clustering_bridge
   setup_clustering_netns 1
 
-  LXD_DIR="$(mktemp -d -p "${TEST_DIR}" XXX)"
+  if [ "${LXD_DIR_KEEP:-"false"}" = "true" ]; then
+    mkdir -p "${LXD_ONE_DIR}"
+    LXD_DIR="${LXD_ONE_DIR}"
+  else
+    LXD_DIR="$(mktemp -d -p "${TEST_DIR}" XXX)"
+  fi
   ns="${bridge}1"
 
   echo "==> Spawn bootstrap cluster node in ${ns} with storage driver ${driver}"
