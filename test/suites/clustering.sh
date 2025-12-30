@@ -1791,13 +1791,8 @@ test_clustering_update_cert_reversion() {
   kill_lxd "${LXD_ONE_DIR}"
 
   # Set up again
-  setup_clustering_bridge
-
   # Bootstrap the first node
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  LXD_DIR_KEEP=true spawn_lxd_and_bootstrap_cluster
 
   # quick check
   ! cmp -s "${LXD_ONE_DIR}/cluster.crt" "${cert_path}" || false
@@ -1852,17 +1847,7 @@ test_clustering_update_cert_reversion() {
 }
 
 test_clustering_update_cert_token() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  # Bootstrap a node to steal its certs
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   cert_path=$(mktemp -p "${TEST_DIR}" XXX)
   key_path=$(mktemp -p "${TEST_DIR}" XXX)
@@ -1880,13 +1865,8 @@ test_clustering_update_cert_token() {
   kill_lxd "${LXD_ONE_DIR}"
 
   # Set up again
-  setup_clustering_bridge
-
   # Bootstrap the first node
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  LXD_DIR_KEEP=true spawn_lxd_and_bootstrap_cluster
 
   # quick check
   ! cmp -s "${LXD_ONE_DIR}/cluster.crt" "${cert_path}" || false
@@ -1940,17 +1920,7 @@ test_clustering_update_cert_token() {
 }
 
 test_clustering_join_api() {
-  # shellcheck disable=SC2034
-  local LXD_DIR LXD_NETNS
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   cert=$(sed ':a;N;$!ba;s/\n/\\n/g' "${LXD_ONE_DIR}/cluster.crt")
 
@@ -1993,16 +1963,7 @@ test_clustering_join_api() {
 }
 
 test_clustering_shutdown_nodes() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -2061,16 +2022,7 @@ test_clustering_shutdown_nodes() {
 }
 
 test_clustering_projects() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -2119,16 +2071,7 @@ test_clustering_projects() {
 }
 
 test_clustering_metrics() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}"
+  spawn_lxd_and_bootstrap_cluster
 
   # Add a newline at the end of each line. YAML has weird rules.
   cert=$(sed ':a;N;$!ba;s/\n/\n\n/g' "${LXD_ONE_DIR}/cluster.crt")
@@ -2197,18 +2140,7 @@ test_clustering_metrics() {
 }
 
 test_clustering_address() {
-  local LXD_DIR
-
-  setup_clustering_bridge
-  prefix="lxd$$"
-  bridge="${prefix}"
-
-  setup_clustering_netns 1
-  LXD_ONE_DIR=$(mktemp -d -p "${TEST_DIR}" XXX)
-  ns1="${prefix}1"
-
-  # Bootstrap the first node using a custom cluster port
-  spawn_lxd_and_bootstrap_cluster "${ns1}" "${bridge}" "${LXD_ONE_DIR}" "dir" "8444"
+  spawn_lxd_and_bootstrap_cluster "dir" "8444"
 
   # The bootstrap node appears in the list with its cluster-specific port
   LXD_DIR="${LXD_ONE_DIR}" lxc cluster list | grep -F :8444
