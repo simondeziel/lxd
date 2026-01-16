@@ -120,22 +120,22 @@ wait_for_microceph() {
     microceph.ceph status
 }
 
+setup_microceph() {
+    local disk="${1:-}"
+    if [ -z "$disk" ]; then
+        echo "Usage: setup_microceph <disk> [osd_count] [channel]"
+        return 1
+    fi
+    local osd_count="${2:-1}"
+    local channel="${3:-latest/edge}"
+
+    install_microceph "$channel"
+    configure_microceph "$disk" "$osd_count"
+    install_ceph_common
+    wait_for_microceph
+}
+
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    full_setup() {
-        disk="${1:-}"
-        if [ -z "$disk" ]; then
-            echo "Usage: $0 <disk> [osd_count] [channel]"
-            exit 1
-        fi
-        osd_count="${2:-1}"
-        channel="${3:-latest/edge}"
-
-        install_microceph "$channel"
-        configure_microceph "$disk" "$osd_count"
-        install_ceph_common
-        wait_for_microceph
-    }
-
     cmd="${1:-}"
     case "${cmd}" in
         install-microceph)
@@ -153,7 +153,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
             wait_for_microceph
             ;;
         *)
-            full_setup "$@"
+            setup_microceph "$@"
             ;;
     esac
 fi
