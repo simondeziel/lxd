@@ -10,6 +10,9 @@ inputs:
     description: Number of OSDs to add to MicroCeph
     default: "1"
     required: false
+  disk:
+    description: Disk to use for MicroCeph
+    required: true
   snap-cache-dir:
     description: Directory to use for snap cache
     default: "/home/runner/snap-cache"
@@ -18,32 +21,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Ephemeral disk checks
-      shell: bash
-      run: |
-          set -eux
-
-          # If the rootfs and the ephemeral part are on the same physical disk, giving the whole
-          # disk to microceph would wipe our rootfs. Since it is pretty rare for GitHub Action
-          # runners to have a single disk, we immediately bail rather than trying to gracefully
-          # handle it. Once snapd releases with https://github.com/snapcore/snapd/pull/13150,
-          # we will be able to stop worrying about that special case.
-          if [ "$(stat -c '%d' /)" = "$(stat -c '%d' /mnt)" ]; then
-            echo "FAIL: rootfs and ephemeral part on the same disk, aborting"
-            exit 1
-          fi
-
-    - name: Free-up ephemeral disk
-      shell: bash
-      id: free_ephemeral_disk
-      run: |
-          set -eux
-
-          sudo swapoff /mnt/swapfile
-          ephemeral_disk="$(findmnt --noheadings --output SOURCE --target /mnt | sed 's/[0-9]\+$//')"
-          sudo umount /mnt
-          echo "ephemeral_disk=${ephemeral_disk}" >> "${GITHUB_OUTPUT}"
-
     - name: Install MicroCeph snap
       shell: bash
       env:
@@ -67,7 +44,7 @@ runs:
     - name: Configure MicroCeph snap
       shell: bash
       env:
-        STEPS_FREE_EPHEMERAL_DISK_OUTPUTS_EPHEMERAL_DISK: ${{ steps.free_ephemeral_disk.outputs.ephemeral_disk }}
+        INPUTS_DISK: ${{ inputs.disk }}
         INPUTS_OSD_COUNT: ${{ inputs.osd-count }}
       run: |
           set -eux
@@ -82,7 +59,7 @@ runs:
           }
           trap cleanup ERR HUP INT TERM
 
-          ephemeral_disk="${STEPS_FREE_EPHEMERAL_DISK_OUTPUTS_EPHEMERAL_DISK}"
+          ephemeral_disk="${INPUTS_DISK}"
           sudo microceph cluster bootstrap
           sudo microceph.ceph config set global mon_allow_pool_size_one true
           sudo microceph.ceph config set global mon_allow_pool_delete true
