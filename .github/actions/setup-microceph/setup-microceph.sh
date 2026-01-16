@@ -121,7 +121,7 @@ wait_for_microceph() {
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    make_ready() {
+    full_setup() {
         disk="${1:-}"
         if [ -z "$disk" ]; then
             echo "Usage: $0 <disk> [osd_count] [channel]"
@@ -135,6 +135,25 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         install_ceph_common
         wait_for_microceph
     }
-    
-    make_ready "$@"
+
+    cmd="${1:-}"
+    case "${cmd}" in
+        install-microceph)
+            shift
+            install_microceph "$@"
+            ;;
+        configure-microceph)
+            shift
+            configure_microceph "$@"
+            ;;
+        install-ceph-common)
+            install_ceph_common
+            ;;
+        wait-for-microceph)
+            wait_for_microceph
+            ;;
+        *)
+            full_setup "$@"
+            ;;
+    esac
 fi
