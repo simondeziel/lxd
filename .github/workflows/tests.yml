@@ -356,16 +356,10 @@ jobs:
           ls -lR /home/runner/go/bin/
           chmod uog+x /home/runner/go/bin/*
 
-      - name: Free-up ephemeral disk
-        id: free_ephemeral_disk
-        if: ${{ contains(matrix.backends, 'ceph') || matrix.backends == 'all' }}
-        uses: ./.github/actions/free-ephemeral-disk
-
       - name: Setup MicroCeph
         if: ${{ contains(matrix.backends, 'ceph') || matrix.backends == 'all' }}
         uses: ./.github/actions/setup-microceph
         with:
-          disk: ${{ steps.free_ephemeral_disk.outputs.ephemeral_disk }}
           osd-count: 3
           snap-cache-dir: ${{ env.SNAP_CACHE_DIR }}
 
@@ -669,16 +663,10 @@ jobs:
           path: /home/runner/work/cache
           key: cache-${{ steps.get-date.outputs.date }}
 
-      - name: Free-up ephemeral disk
-        id: free_ephemeral_disk
-        if: ${{ matrix.test == 'conversion' || matrix.test == 'storage-buckets' || matrix.test == 'storage-vm ceph' || matrix.test == 'storage-volumes-vm' }}
-        uses: ./.github/actions/free-ephemeral-disk
-
       - name: Setup MicroCeph
         if: ${{ matrix.test == 'conversion' || matrix.test == 'storage-buckets' || matrix.test == 'storage-vm ceph' || matrix.test == 'storage-volumes-vm' }}
         uses: ./.github/actions/setup-microceph
         with:
-          disk: ${{ steps.free_ephemeral_disk.outputs.ephemeral_disk }}
           osd-count: 3
           snap-cache-dir: ${{ env.SNAP_CACHE_DIR }}
 
