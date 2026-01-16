@@ -29,8 +29,9 @@ runs:
         SNAP_CHANNEL: ${{ inputs.microceph-channel }}
       run: |
           set -eux
-          . "${GITHUB_ACTION_PATH}/setup-microceph.sh"
-          install_microceph "${SNAP_CHANNEL}"
+          # External repos using this action won't have access to the `test/includes/snap.sh` file
+          # so install directly from the store instead.
+          sudo --preserve-env=SNAP_CACHE_DIR,SNAP_CHANNEL bash -c ". ${GITHUB_ACTION_PATH}/setup-microceph.sh; install_microceph \"\${SNAP_CHANNEL}\""
 
     - name: Configure MicroCeph snap
       shell: bash
@@ -39,19 +40,16 @@ runs:
         INPUTS_OSD_COUNT: ${{ inputs.osd-count }}
       run: |
           set -eux
-          . "${GITHUB_ACTION_PATH}/setup-microceph.sh"
-          configure_microceph "${EPHEMERAL_DISK}" "${INPUTS_OSD_COUNT}"
+          sudo --preserve-env=EPHEMERAL_DISK,INPUTS_OSD_COUNT bash -c ". ${GITHUB_ACTION_PATH}/setup-microceph.sh; configure_microceph \"\${EPHEMERAL_DISK}\" \"\${INPUTS_OSD_COUNT}\""
 
     - name: Install ceph-common package
       shell: bash
       run: |
           set -eux
-          . "${GITHUB_ACTION_PATH}/setup-microceph.sh"
-          install_ceph_common
+          sudo bash -c ". ${GITHUB_ACTION_PATH}/setup-microceph.sh; install_ceph_common"
 
     - name: Wait for MicroCeph to be ready
       shell: bash
       run: |
           set -eux
-          . "${GITHUB_ACTION_PATH}/setup-microceph.sh"
-          wait_for_microceph
+          sudo bash -c ". ${GITHUB_ACTION_PATH}/setup-microceph.sh; wait_for_microceph"
