@@ -10,9 +10,6 @@ inputs:
     description: Number of OSDs to add to MicroCeph
     default: "1"
     required: false
-  disk:
-    description: Disk to use for MicroCeph
-    required: true
   snap-cache-dir:
     description: Directory to use for snap cache
     default: "/home/runner/snap-cache"
@@ -21,6 +18,10 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Free-up ephemeral disk
+      id: free_ephemeral_disk
+      uses: ./.github/actions/free-ephemeral-disk
+
     - name: Install MicroCeph snap
       shell: bash
       env:
@@ -44,7 +45,7 @@ runs:
     - name: Configure MicroCeph snap
       shell: bash
       env:
-        INPUTS_DISK: ${{ inputs.disk }}
+        EPHEMERAL_DISK: ${{ steps.free_ephemeral_disk.outputs.ephemeral_disk }}
         INPUTS_OSD_COUNT: ${{ inputs.osd-count }}
       run: |
           set -eux
@@ -59,7 +60,7 @@ runs:
           }
           trap cleanup ERR HUP INT TERM
 
-          ephemeral_disk="${INPUTS_DISK}"
+          ephemeral_disk="${EPHEMERAL_DISK}"
           sudo microceph cluster bootstrap
           sudo microceph.ceph config set global mon_allow_pool_size_one true
           sudo microceph.ceph config set global mon_allow_pool_delete true
