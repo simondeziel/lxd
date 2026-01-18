@@ -6,6 +6,7 @@ install_microceph() {
   # SNAP_CACHE_DIR is expected to be in the environment if set
 
   if [ -e test/includes/snap.sh ]; then
+      # shellcheck disable=SC1091
       . test/includes/snap.sh
       install_snap snapd latest/beta
       install_snap core24 latest/stable
@@ -63,6 +64,7 @@ configure_microceph() {
       # Error: unable to list system disks: Failed to find "/dev/disk/by-id/scsi-36...9e-part1": lstat /dev/disk/by-id/scsi-36...9e-part1: no such file or directory
       wipe=""
       for attempt in 1 2 3; do
+        # shellcheck disable=SC2248
         if microceph disk add "${disk_part}" ${wipe}; then
           break # Success, exit retry loop
         elif [ "${attempt}" -lt 3 ]; then
@@ -115,6 +117,7 @@ wait_for_microceph() {
 # setup_microceph: install and configure MicroCeph with the specified disk and OSD count
 # If no disk is specified, defaults to /dev/disk/by-id/*-lxd--ephemeral
 setup_microceph() {
+  # shellcheck disable=SC2012
   local disk="${1:-"$(ls -1 /dev/disk/by-id/*-lxd--ephemeral | head -n1)"}"
   if [ -z "$disk" ]; then
     echo "Usage: setup_microceph <disk> [osd_count] [channel]"
