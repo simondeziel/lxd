@@ -113,7 +113,7 @@ wait_for_microceph() {
 # setup_microceph: install and configure MicroCeph with the specified disk and OSD count
 # If no disk is specified, defaults to /dev/disk/by-id/*-lxd--ephemeral
 setup_microceph() {
-    local disk="${1:-"/dev/disk/by-id/*-lxd--ephemeral"}"
+    local disk="${1:-"$(ls -1 /dev/disk/by-id/*-lxd--ephemeral | head -n1)"}"
     if [ -z "$disk" ]; then
         echo "Usage: setup_microceph <disk> [osd_count] [channel]"
         return 1
