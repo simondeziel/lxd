@@ -5,12 +5,10 @@ install_microceph() {
     # SNAP_CACHE_DIR is expected to be in the environment if set
 
     if [ -e test/includes/snap.sh ]; then
-        bash -c "
-            . test/includes/snap.sh; \
-            install_snap snapd latest/beta; \
-            install_snap core24 latest/stable; \
-            install_snap microceph \"${channel}\"; \
-        "
+        . test/includes/snap.sh
+        install_snap snapd latest/beta
+        install_snap core24 latest/stable
+        install_snap microceph \"${channel}\"
     else
         snap install microceph --channel="${channel}"
     fi
@@ -19,16 +17,6 @@ install_microceph() {
 configure_microceph() {
     local disk="${1}"
     local osd_count="${2}"
-
-    cleanup() {
-        set +e
-        # dmesg may contain oops, IO errors, crashes, etc
-        echo "::group::dmesg logs"
-        journalctl --quiet --no-hostname --no-pager --boot=0 --lines=100 --dmesg
-        echo "::endgroup::"
-        exit 1
-    }
-    trap cleanup ERR HUP INT TERM
 
     microceph cluster bootstrap
     microceph.ceph config set global mon_allow_pool_size_one true
