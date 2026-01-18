@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # install_microceph: install MicroCeph from the specified channel
 install_microceph() {
   local channel="${1}"
@@ -101,11 +103,11 @@ install_ceph_common() {
 wait_for_microceph() {
   # Wait until there are no more "unknowns" pgs
   for _ in $(seq 60); do
-      if microceph.ceph pg stat | grep -wF unknown; then
-          sleep 1
-      else
-          break
-      fi
+    if microceph.ceph pg stat | grep -wF unknown; then
+      sleep 1
+    else
+      break
+    fi
   done
   microceph.ceph status
 }
@@ -113,40 +115,40 @@ wait_for_microceph() {
 # setup_microceph: install and configure MicroCeph with the specified disk and OSD count
 # If no disk is specified, defaults to /dev/disk/by-id/*-lxd--ephemeral
 setup_microceph() {
-    local disk="${1:-"$(ls -1 /dev/disk/by-id/*-lxd--ephemeral | head -n1)"}"
-    if [ -z "$disk" ]; then
-        echo "Usage: setup_microceph <disk> [osd_count] [channel]"
-        return 1
-    fi
-    local osd_count="${2:-1}"
-    local channel="${3:-latest/edge}"
+  local disk="${1:-"$(ls -1 /dev/disk/by-id/*-lxd--ephemeral | head -n1)"}"
+  if [ -z "$disk" ]; then
+    echo "Usage: setup_microceph <disk> [osd_count] [channel]"
+    return 1
+  fi
+  local osd_count="${2:-1}"
+  local channel="${3:-latest/edge}"
 
-    install_microceph "${channel}"
-    configure_microceph "${disk}" "${osd_count}"
-    install_ceph_common
-    wait_for_microceph
+  install_microceph "${channel}"
+  configure_microceph "${disk}" "${osd_count}"
+  install_ceph_common
+  wait_for_microceph
 }
 
 # If the script is being run directly, execute the specified command
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    cmd="${1:-}"
-    case "${cmd}" in
-        install-microceph)
-            shift
-            install_microceph "$@"
-            ;;
-        configure-microceph)
-            shift
-            configure_microceph "$@"
-            ;;
-        install-ceph-common)
-            install_ceph_common
-            ;;
-        wait-for-microceph)
-            wait_for_microceph
-            ;;
-        *)
-            setup_microceph "$@"
-            ;;
-    esac
+  cmd="${1:-}"
+  case "${cmd}" in
+    install-microceph)
+      shift
+      install_microceph "$@"
+      ;;
+    configure-microceph)
+      shift
+      configure_microceph "$@"
+      ;;
+    install-ceph-common)
+      install_ceph_common
+      ;;
+    wait-for-microceph)
+      wait_for_microceph
+      ;;
+    *)
+      setup_microceph "$@"
+      ;;
+  esac
 fi
