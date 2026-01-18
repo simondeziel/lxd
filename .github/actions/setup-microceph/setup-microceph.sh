@@ -80,7 +80,7 @@ configure_microceph() {
 
     rm -f /snap/bin/rbd
     rm -rf /etc/ceph
-    ln -s /var/snap/microceph/current/conf/ /etc/ceph
+    ln -s /var/snap/microceph/current/conf /etc/ceph
     microceph enable rgw
     microceph.ceph osd pool create cephfs_meta 32
     microceph.ceph osd pool create cephfs_data 32
