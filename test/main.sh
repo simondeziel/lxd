@@ -141,6 +141,13 @@ run_dependency_checks() {
     download_minio
   fi
 
+  # Check for ephemeral disk for MicroCeph and setup if found
+  lxd_ephemeral_disk="$(find /dev/disk/by-id/ -name '*lxd-ephemeral*' -print -quit 2>/dev/null || true)"
+  if [ -n "${lxd_ephemeral_disk}" ]; then
+    echo "==> Setting up MicroCeph on ${lxd_ephemeral_disk}"
+    setup_microceph "${lxd_ephemeral_disk}"
+  fi
+
   echo "==> Checking test dependencies"
   if ! check_dependencies devlxd-client lxd-client fuidshift mini-oidc sysinfo; then
     make -C "${MAIN_DIR}/.." test-binaries
