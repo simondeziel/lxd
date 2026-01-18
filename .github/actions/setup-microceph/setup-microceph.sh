@@ -4,11 +4,10 @@ install_microceph() {
   # SNAP_CACHE_DIR is expected to be in the environment if set
 
   if [ -e test/includes/snap.sh ]; then
-    bash -c "
       . test/includes/snap.sh
       install_snap snapd latest/beta
       install_snap core24 latest/stable
-      install_snap microceph \"${channel}\""
+      install_snap microceph "${channel}"
   else
     snap install microceph --channel="${channel}"
   fi
