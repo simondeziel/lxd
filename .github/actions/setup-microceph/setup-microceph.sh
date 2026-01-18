@@ -4,7 +4,7 @@ install_microceph() {
   # SNAP_CACHE_DIR is expected to be in the environment if set
 
   if [ -e test/includes/snap.sh ]; then
-    sudo bash -c "
+    bash -c "
       . test/includes/snap.sh
       install_snap snapd latest/beta
       install_snap core24 latest/stable
@@ -19,31 +19,31 @@ configure_microceph() {
   local disk="${1}"
   local osd_count="${2}"
 
-  sudo microceph cluster bootstrap
-  sudo microceph.ceph config set global mon_allow_pool_size_one true
-  sudo microceph.ceph config set global mon_allow_pool_delete true
-  sudo microceph.ceph config set global osd_pool_default_size 1
-  sudo microceph.ceph config set global osd_memory_target 939524096
-  sudo microceph.ceph osd crush rule rm replicated_rule
-  sudo microceph.ceph osd crush rule create-replicated replicated default osd
+  microceph cluster bootstrap
+  microceph.ceph config set global mon_allow_pool_size_one true
+  microceph.ceph config set global mon_allow_pool_delete true
+  microceph.ceph config set global osd_pool_default_size 1
+  microceph.ceph config set global osd_memory_target 939524096
+  microceph.ceph osd crush rule rm replicated_rule
+  microceph.ceph osd crush rule create-replicated replicated default osd
   for flag in nosnaptrim nobackfill norebalance norecover noscrub nodeep-scrub; do
-    sudo microceph.ceph osd set "${flag}"
+    microceph.ceph osd set "${flag}"
   done
 
   # If there is more than one OSD, set up partitions.
   if [ "${osd_count}" -gt 1 ]; then
-    sudo blkdiscard "${disk}" --force
-    sudo parted "${disk}" --script mklabel gpt
+    blkdiscard "${disk}" --force
+    parted "${disk}" --script mklabel gpt
 
     for i in $(seq 1 "${osd_count}"); do
         # Create equal sized partitions for each OSD.
         min="$(( (i-1) *  100 / osd_count ))"
         max="$(( i * 100 / osd_count ))"
-        sudo parted "${disk}" --align optimal --script mkpart primary "${min}%" "${max}%"
+        parted "${disk}" --align optimal --script mkpart primary "${min}%" "${max}%"
     done
 
     # Force the detection of the new partitions
-    sudo partx --update "${disk}"
+    partx --update "${disk}"
 
     # Allow (more) time for the kernel to pick up the new partitions
     disk_name="$(basename "${disk}")"
@@ -56,13 +56,13 @@ configure_microceph() {
     for i in $(seq 1 "${osd_count}"); do
       # MicroCeph does not accept partitions directly.
       # See: https://github.com/canonical/microceph/issues/251
-      disk_part="$(sudo losetup --find --nooverlap --direct-io=on --show "${disk}${i}")"
+      disk_part="$(losetup --find --nooverlap --direct-io=on --show "${disk}${i}")"
 
       # Retry logic for "microceph disk add" that can fail due to partitions not being ready
       # Error: unable to list system disks: Failed to find "/dev/disk/by-id/scsi-36...9e-part1": lstat /dev/disk/by-id/scsi-36...9e-part1: no such file or directory
       wipe=""
       for attempt in 1 2 3; do
-        if sudo microceph disk add "${disk_part}" ${wipe}; then
+        if microceph disk add "${disk_part}" ${wipe}; then
           break # Success, exit retry loop
         elif [ "${attempt}" -lt 3 ]; then
           echo "WARN: \"microceph disk add ${disk_part}\" failed, retrying with \"--wipe\" (${attempt}/3)"
@@ -76,39 +76,39 @@ configure_microceph() {
       done
     done
   else
-    sudo microceph disk add --wipe "${disk}"
+    microceph disk add --wipe "${disk}"
   fi
 
-  sudo rm -f /snap/bin/rbd
-  sudo rm -rf /etc/ceph
-  sudo ln -s /var/snap/microceph/current/conf /etc/ceph
+  rm -f /snap/bin/rbd
+  rm -rf /etc/ceph
+  ln -s /var/snap/microceph/current/conf /etc/ceph
 
-  sudo microceph enable rgw
-  sudo microceph.ceph osd pool create cephfs_meta 32
-  sudo microceph.ceph osd pool create cephfs_data 32
-  sudo microceph.ceph fs new cephfs cephfs_meta cephfs_data
-  sudo microceph.ceph fs ls
+  microceph enable rgw
+  microceph.ceph osd pool create cephfs_meta 32
+  microceph.ceph osd pool create cephfs_data 32
+  microceph.ceph fs new cephfs cephfs_meta cephfs_data
+  microceph.ceph fs ls
 }
 
 # install_ceph_common: install ceph-common package for ceph CLI tools
 install_ceph_common() {
-  sudo apt-get update
-  sudo apt-get install --no-install-recommends -y ceph-common
+  apt-get update
+  apt-get install --no-install-recommends -y ceph-common
   # reclaim some space
-  sudo apt-get clean
+  apt-get clean
 }
 
 # wait_for_microceph: wait until MicroCeph is ready
 wait_for_microceph() {
   # Wait until there are no more "unknowns" pgs
   for _ in $(seq 60); do
-      if sudo microceph.ceph pg stat | grep -wF unknown; then
+      if microceph.ceph pg stat | grep -wF unknown; then
           sleep 1
       else
           break
       fi
   done
-  sudo microceph.ceph status
+  microceph.ceph status
 }
 
 # setup_microceph: install and configure MicroCeph with the specified disk and OSD count
