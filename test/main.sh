@@ -141,11 +141,10 @@ run_dependency_checks() {
     download_minio
   fi
 
-  # Check for ephemeral disk for MicroCeph and setup if found
-  lxd_ephemeral_disk="$(find /dev/disk/by-id/ -name '*lxd-ephemeral*' -print -quit 2>/dev/null || true)"
-  if [ -n "${lxd_ephemeral_disk}" ]; then
-    echo "==> Setting up MicroCeph on ${lxd_ephemeral_disk}"
-    setup_microceph "${lxd_ephemeral_disk}"
+  # Setup MicroCeph if the ceph backend is selected
+  if [[ "${LXD_BACKENDS}" == *"ceph"* ]]; then
+    # Setup MicroCeph
+    setup_microceph
   fi
 
   echo "==> Checking test dependencies"
