@@ -117,6 +117,11 @@ wait_for_microceph() {
 # setup_microceph: install and configure MicroCeph with the specified disk and OSD count
 # If no disk is specified, defaults to /dev/disk/by-id/*-lxd--ephemeral
 setup_microceph() {
+  # If MicroCeph is already installed and configured, skip setup
+  if command -v microceph >/dev/null && microceph.ceph status >/dev/null 2>&1; then
+    return 0
+  fi
+
   # shellcheck disable=SC2012
   local disk="${1:-"$(ls -1 /dev/disk/by-id/*-lxd--ephemeral | head -n1)"}"
   if [ -z "$disk" ]; then
