@@ -132,8 +132,7 @@ func (c *cmdFileCreate) command() *cobra.Command {
 	cmd.Use = usage("create", "[<remote>:]<instance>/<path> [<symlink target path>]")
 	cmd.Short = "Create file, directory or symlink in instance"
 	cmd.Long = cli.FormatSection("Description", cmd.Short)
-	cmd.Example = cli.FormatSection("", 
-		`lxc file create foo/bar
+	cmd.Example = cli.FormatSection("", `lxc file create foo/bar
 	   To create a file /bar in the foo instance.
 lxc file create --type=symlink foo/bar baz
 	   To create a symlink /bar in instance foo whose target is baz.`)
@@ -363,7 +362,7 @@ type cmdFileEdit struct {
 func (c *cmdFileEdit) command() *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Use = usage("edit", "[<remote>:]<instance>/<path>")
-	cmd.Short = "Edit file in instances"
+	cmd.Short = "Edit file in instance"
 	cmd.Long = cli.FormatSection("Description", cmd.Short)
 
 	cmd.RunE = c.run
@@ -450,8 +449,7 @@ func (c *cmdFilePull) command() *cobra.Command {
 	cmd.Use = usage("pull", "[<remote>:]<instance>/<path> [[<remote>:]<instance>/<path>...] <target path>")
 	cmd.Short = "Pull files from instances"
 	cmd.Long = cli.FormatSection("Description", cmd.Short)
-	cmd.Example = cli.FormatSection("", 
-		`lxc file pull foo/etc/hosts .
+	cmd.Example = cli.FormatSection("", `lxc file pull foo/etc/hosts .
    To pull /etc/hosts from the instance and write it to the current directory.`)
 
 	cmd.Flags().BoolVarP(&c.file.flagMkdir, "create-dirs", "p", false, "Create any directories necessary")
@@ -1201,8 +1199,7 @@ func (c *cmdFileMount) command() *cobra.Command {
 	cmd.Use = usage("mount", "[<remote>:]<instance>[/<path>] [<target path>]")
 	cmd.Short = "Mount path from instance"
 	cmd.Long = cli.FormatSection("Description", cmd.Short)
-	cmd.Example = cli.FormatSection("", 
-		`lxc file mount foo/root fooroot
+	cmd.Example = cli.FormatSection("", `lxc file mount foo/root fooroot
    To mount /root from the instance foo onto the local fooroot directory.`)
 
 	cmd.RunE = c.run
