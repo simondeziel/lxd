@@ -45,12 +45,12 @@ func (p *Process) hasApparmor() bool {
 		return false
 	}
 
-	_, err := exec.LookPath("aa-exec")
-	if err != nil {
+	if !shared.PathExists("/sys/kernel/security/apparmor") {
 		return false
 	}
 
-	if !shared.PathExists("/sys/kernel/security/apparmor") {
+	_, err := exec.LookPath("aa-exec")
+	if err != nil {
 		return false
 	}
 
