@@ -150,6 +150,10 @@ const defaultColumnsAllProjects = "ens46tSL"
 const configColumnType = "config"
 const deviceColumnType = "devices"
 
+// dotPrefixMatch returns true if the full string starts with the short string,
+// where the short string is interpreted as a dot-separated sequence of
+// prefixes. For example, "foo.bar" would match "foo.bar.baz" and "foo.bar2",
+// but not "foobar.bar".
 func (c *cmdList) dotPrefixMatch(short string, full string) bool {
 	for {
 		shortSeg, shortRest, shortHasMore := strings.Cut(short, ".")
