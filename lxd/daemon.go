@@ -1809,7 +1809,8 @@ func (d *Daemon) init() error {
 			return errors.New("Cannot convert BGP ASN to uint32: Upper bound exceeded")
 		}
 
-		err := d.bgp.Configure(bgpAddress, uint32(bgpASN), net.ParseIP(bgpRouterID))
+		bgpGTSM := d.globalConfig.BGPGTSM()
+		err := d.bgp.Configure(bgpAddress, uint32(bgpASN), net.ParseIP(bgpRouterID), bgpGTSM)
 		if err != nil {
 			return err
 		}

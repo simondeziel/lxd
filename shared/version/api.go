@@ -483,6 +483,7 @@ var APIExtensions = []string{
 	"bulk_operations",
 	"ovn_dynamic_northbound_connection",
 	"storage_zfs_promote",
+	"bgp_peers_gtsm",
 }
 
 // APIExtensionsCount returns the number of available API extensions.

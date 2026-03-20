@@ -61,4 +61,37 @@ test_bgp() {
     echo "ERROR: BGP listener is still up on ${BGP_ADDR}:${BGP_PORT_ALT} after unconfiguration, aborting" >&2
     exit 1
   fi
+
+  sub_test "Verify core.bgp_peers_gtsm defaults to false"
+  [ "$(lxc config get core.bgp_peers_gtsm)" = "false" ]
+
+  sub_test "Enable GTSM and verify the BGP listener remains reachable"
+  lxc config set core.bgp_address "${BGP_ADDR}:${BGP_PORT}" core.bgp_routerid "${BGP_ROUTER_ID}" core.bgp_asn "${BGP_ASN}"
+  for _ in $(seq 10); do
+    bgp_marker_check "${BGP_ADDR}" "${BGP_PORT}" && break
+    sleep 1
+  done
+  if ! bgp_marker_check "${BGP_ADDR}" "${BGP_PORT}"; then
+    echo "ERROR: BGP listener did not come up before enabling GTSM, aborting" >&2
+    exit 1
+  fi
+
+  lxc config set core.bgp_peers_gtsm true
+  [ "$(lxc config get core.bgp_peers_gtsm)" = "true" ]
+  # The listener must survive the GTSM reconfiguration.
+  if ! bgp_marker_check "${BGP_ADDR}" "${BGP_PORT}"; then
+    echo "ERROR: BGP listener stopped responding after enabling GTSM, aborting" >&2
+    exit 1
+  fi
+
+  sub_test "Disable GTSM and verify the BGP listener remains reachable"
+  lxc config set core.bgp_peers_gtsm false
+  [ "$(lxc config get core.bgp_peers_gtsm)" = "false" ]
+  if ! bgp_marker_check "${BGP_ADDR}" "${BGP_PORT}"; then
+    echo "ERROR: BGP listener stopped responding after disabling GTSM, aborting" >&2
+    exit 1
+  fi
+
+  # Cleanup.
+  lxc config unset core.bgp_address core.bgp_routerid core.bgp_asn core.bgp_peers_gtsm
 }

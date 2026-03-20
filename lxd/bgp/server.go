@@ -29,6 +29,7 @@ type Server struct {
 	address  string
 	asn      uint32
 	routerID net.IP
+	gtsm     bool
 	paths    map[string]path
 	peers    map[string]peer
 
@@ -183,19 +184,23 @@ func (s *Server) stop() error {
 }
 
 // Configure updates the listener with a new configuration..
-func (s *Server) Configure(address string, asn uint32, routerID net.IP) error {
+func (s *Server) Configure(address string, asn uint32, routerID net.IP, gtsm bool) error {
 	// Locking.
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	return s.configure(address, asn, routerID)
+	return s.configure(address, asn, routerID, gtsm)
 }
 
-func (s *Server) configure(address string, asn uint32, routerID net.IP) error {
+func (s *Server) configure(address string, asn uint32, routerID net.IP, gtsm bool) error {
 	// Store current configuration for reverting.
 	oldAddress := s.address
 	oldASN := s.asn
 	oldRouterID := s.routerID
+	oldGTSM := s.gtsm
+
+	// Apply new GTSM setting before stop/start so peers are re-added correctly.
+	s.gtsm = gtsm
 
 	// Setup reverter.
 	revert := revert.New()
@@ -204,13 +209,17 @@ func (s *Server) configure(address string, asn uint32, routerID net.IP) error {
 	// Stop the listener.
 	err := s.stop()
 	if err != nil {
+		s.gtsm = oldGTSM
 		return fmt.Errorf("Failed stopping current listener: %w", err)
 	}
 
 	// Check if we should start.
 	if address != "" && asn > 0 && routerID != nil {
 		// Restore old address on failure.
-		revert.Add(func() { _ = s.start(oldAddress, oldASN, oldRouterID) })
+		revert.Add(func() {
+			s.gtsm = oldGTSM
+			_ = s.start(oldAddress, oldASN, oldRouterID)
+		})
 
 		// Start the listener with the new address.
 		err = s.start(address, asn, routerID)
@@ -409,6 +418,11 @@ func (s *Server) addPeer(address net.IP, asn uint32, password string, holdTime u
 	}
 
 	// Setup the configuration.
+	multihopTTL := uint32(255)
+	if s.gtsm {
+		multihopTTL = 1
+	}
+
 	n := &bgpAPI.Peer{
 		// Peer information.
 		Conf: &bgpAPI.PeerConf{
@@ -423,10 +437,13 @@ func (s *Server) addPeer(address net.IP, asn uint32, password string, holdTime u
 			RestartTime: 3600,
 		},
 
-		// Always allow for the maximum multihop.
+		// When GTSM is disabled use eBGP multihop with the maximum TTL to
+		// support non-directly-connected peers. When GTSM is enabled,
+		// restrict sessions to directly connected neighbors (TTL = 1,
+		// RFC 5082).
 		EbgpMultihop: &bgpAPI.EbgpMultihop{
-			Enabled:     true,
-			MultihopTtl: 255,
+			Enabled:     !s.gtsm,
+			MultihopTtl: multihopTTL,
 		},
 	}
 

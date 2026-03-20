@@ -202,3 +202,22 @@ func TestAddPeerConflictPassword(t *testing.T) {
 	err = s.AddPeer(addr, 65000, "different", 0)
 	require.Error(t, err)
 }
+
+// TestGTSM verifies that enabling GTSM on a server (bgp == nil path) is
+// reflected in the stored state and that disabling it restores the default.
+func TestGTSM(t *testing.T) {
+	s := NewServer()
+
+	require.False(t, s.gtsm)
+
+	// Configure with GTSM enabled (no live BGP server, so this exercises only
+	// the in-memory state path).
+	err := s.configure("", 0, nil, true)
+	require.NoError(t, err)
+	require.True(t, s.gtsm)
+
+	// Disable GTSM again.
+	err = s.configure("", 0, nil, false)
+	require.NoError(t, err)
+	require.False(t, s.gtsm)
+}

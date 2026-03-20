@@ -3026,3 +3026,10 @@ A {config:option}`storage-zfs-volume-conf:zfs.promote` configuration key was int
 It's a Boolean that defaults to `false` and that when set to `true` instructs LXD to ZFS promote the volume being created (or re-created) from a clone.
 
 This is primarily useful when combined with the `initial.` `disk` device configuration options, as it allows controlling ZFS promotion when creating instances from other instances.
+
+(extension-bgp-peers-gtsm)=
+## `bgp_peers_gtsm`
+
+Adds the {config:option}`server-core:core.bgp_peers_gtsm` server configuration key.
+When set to `true`, BGP peers are configured with a TTL of 1, restricting sessions to directly connected neighbors per the Generalized TTL Security Mechanism (GTSM, RFC 5082).
+The default value is `false`, preserving the previous behavior of allowing multi-hop BGP sessions.

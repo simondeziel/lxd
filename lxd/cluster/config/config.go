@@ -67,6 +67,12 @@ func (c *Config) BGPASN() int64 {
 	return c.m.GetInt64("core.bgp_asn")
 }
 
+// BGPGTSM returns whether GTSM (Generalized TTL Security Mechanism, RFC 5082)
+// is enabled for BGP peers.
+func (c *Config) BGPGTSM() bool {
+	return c.m.GetBool("core.bgp_peers_gtsm")
+}
+
 // HTTPSAllowedHeaders returns the relevant CORS setting.
 func (c *Config) HTTPSAllowedHeaders() string {
 	return c.m.GetString("core.https_allowed_headers")
@@ -417,6 +423,16 @@ var ConfigSchema = config.Schema{
 		//  defaultdesc: `0`
 		//  shortdesc: BGP Autonomous System Number for the local server
 		"core.bgp_asn": {Type: config.Int64, Default: "0", Validator: validate.Optional(validate.IsInRange(0, 4294967294))},
+
+		// lxdmeta:generate(entities=server; group=core; key=core.bgp_peers_gtsm)
+		// When enabled, BGP peers are configured with a TTL of 1, restricting
+		// sessions to directly connected neighbors (RFC 5082).
+		// ---
+		//  type: bool
+		//  scope: global
+		//  defaultdesc: `false`
+		//  shortdesc: Restrict BGP peers to directly connected neighbors using GTSM
+		"core.bgp_peers_gtsm": {Type: config.Bool, Default: "false"},
 
 		// lxdmeta:generate(entities=server; group=core; key=core.https_allowed_headers)
 		//

@@ -1090,6 +1090,8 @@ func doAPI10UpdateTriggers(d *Daemon, nodeChanged, clusterChanged map[string]str
 
 		case "core.bgp_asn":
 			bgpChanged = true
+		case "core.bgp_peers_gtsm":
+			bgpChanged = true
 		case "loki.api.url":
 			fallthrough
 		case "loki.auth.username":
@@ -1206,12 +1208,13 @@ func doAPI10UpdateTriggers(d *Daemon, nodeChanged, clusterChanged map[string]str
 		address := newNodeConfig.BGPAddress()
 		asn := newClusterConfig.BGPASN()
 		routerid := newNodeConfig.BGPRouterID()
+		gtsm := newClusterConfig.BGPGTSM()
 
 		if asn > math.MaxUint32 {
 			return errors.New("Cannot convert BGP ASN to uint32: Upper bound exceeded")
 		}
 
-		err := s.BGP.Configure(address, uint32(asn), net.ParseIP(routerid))
+		err := s.BGP.Configure(address, uint32(asn), net.ParseIP(routerid), gtsm)
 		if err != nil {
 			return fmt.Errorf("Failed reconfiguring BGP: %w", err)
 		}
