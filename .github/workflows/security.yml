@@ -35,7 +35,7 @@ jobs:
 
       - name: Download Trivy DB
         id: db_download
-        run: trivy fs --download-db-only --cache-dir /home/runner/vuln-cache
+        run: trivy fs --download-db-only
         continue-on-error: true
 
       - name: Use previously downloaded database
@@ -52,7 +52,6 @@ jobs:
           trivy fs --skip-db-update \
           --scanners vuln,secret,misconfig \
           --format sarif \
-          --cache-dir /home/runner/vuln-cache \
           --severity LOW,MEDIUM,HIGH,CRITICAL \
           --output trivy-lxd-repo-scan-results.sarif .
 
@@ -125,7 +124,6 @@ jobs:
           trivy rootfs --skip-db-update \
           --scanners vuln,secret,misconfig \
           --format sarif \
-          --cache-dir /home/runner/vuln-cache \
           --severity LOW,MEDIUM,HIGH,CRITICAL \
           --output /home/runner/${{ matrix.version }}-stable.sarif squashfs-root
 

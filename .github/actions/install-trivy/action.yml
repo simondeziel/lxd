@@ -1,18 +1,39 @@
 name: Install Trivy
-description: Installs Trivy from deb package
+description: Installs Trivy via pinned Docker image
 
 runs:
   using: composite
   steps:
-    # We are using the deb package instead of the trivy action because we need to point to the cache directory
-    # with cache-dir, and there is currently a bug in that functionality on the Trivy GitHub action.
-    # See https://github.com/aquasecurity/trivy-action/issues/12.
-    - name: Install Trivy
+    - name: Resolve Trivy image reference
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        # Read the pinned image reference from the Dockerfile - single source of truth managed by Dependabot.
+        TRIVY_IMAGE=$(awk '/^FROM/{print $2}' "${ACTION_PATH}/Dockerfile")
+        echo "TRIVY_IMAGE=${TRIVY_IMAGE}" >> "$GITHUB_ENV"
+
+    - name: Verify Trivy image signature
       shell: bash
       run: |
+        # Verify the image was signed by Aqua's own CI pipeline via Sigstore keyless signing.
+        # This proves provenance beyond the digest alone (which only guarantees content integrity).
+        cosign verify \
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+          --certificate-identity-regexp "https://github.com/aquasecurity/trivy/.github/workflows/" \
+          "${TRIVY_IMAGE}"
+
+    - name: Setup Trivy Docker Wrapper
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        # Ensure the host cache directory exists
         mkdir -p /home/runner/vuln-cache
-        sudo apt-get install wget gnupg
-        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
-        echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-        sudo apt-get update
-        sudo apt-get install trivy
+
+        # Install the wrapper, substituting ${TRIVY_IMAGE} while leaving all other
+        # shell variables ($GITHUB_WORKSPACE, $PWD, $@) intact for runtime expansion.
+        envsubst '${TRIVY_IMAGE}' < "${ACTION_PATH}/trivy-wrapper.sh" | sudo tee /usr/local/bin/trivy > /dev/null
+
+        # Make the wrapper executable
+        sudo chmod +x /usr/local/bin/trivy

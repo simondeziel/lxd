@@ -46,6 +46,15 @@ updates:
         patterns:
           - "*"
 
+  - package-ecosystem: "docker"
+    directory: "/.github/actions/install-trivy"
+    labels: []
+    schedule:
+      interval: "weekly"
+    target-branch: "main"
+    cooldown:
+      default-days: 7
+
   - package-ecosystem: "gomod"
     directory: "/"
     ignore:
