@@ -202,3 +202,81 @@ test_snap_vm_empty() {
   # useful to test snap provided BIOS boot
   _boot_mode
 }
+
+test_snap_efi_vars() {
+  architecture="$(uname -m)"
+  if [ "${architecture}" != "x86_64" ] && [ "${architecture}" != "aarch64" ]; then
+    export TEST_UNMET_REQUIREMENT="EFI variables are not supported on ${architecture}"
+    return 0
+  fi
+
+  if ! lxc query /1.0 | jq --exit-status '.api_extensions | contains(["instances_uefi_vars"])' > /dev/null; then
+    export TEST_UNMET_REQUIREMENT="Missing instances_uefi_vars API extension"
+    return 0
+  fi
+
+  ensure_import_ubuntu_vm_image
+
+  pool=$(lxc profile device get default root pool)
+  orig_volume_size="$(lxc storage get "${pool}" volume.size)"
+  if [ -n "${orig_volume_size:-}" ]; then
+    lxc storage set "${pool}" volume.size "${SMALLEST_VM_ROOT_DISK}"
+  fi
+
+  EFI_GLOBAL_VARIABLE_GUID="8be4df61-93ca-11d2-aa0d-00e098032b8c"
+  EFI_VAR_FULL_NAME="testvar-${EFI_GLOBAL_VARIABLE_GUID}"
+  # "Hello from LXD" in ASCII hex.
+  EFI_VAR_VALUE="48656c6c6f2066726f6d204c5844"
+  EFI_VAR_VALUE_ASCII="Hello from LXD"
+
+  lxc launch ubuntu-vm v1 --vm -c limits.memory=384MiB -d "${SMALL_VM_ROOT_DISK}"
+  waitInstanceReady v1
+
+  sub_test "Verify setting an EFI variable while the VM is running is rejected"
+  if lxc config uefi set v1 "${EFI_VAR_FULL_NAME}"="${EFI_VAR_VALUE}"; then
+    echo "ERROR: Setting EFI variable while VM is running unexpectedly succeeded" >&2
+    exit 1
+  fi
+
+  lxc stop -f v1
+
+  sub_test "Verify that invalid hex-encoded EFI variable data is rejected"
+  # "0" is not a valid HEX-encoding for a byte (should be "00").
+  if lxc config uefi set v1 "${EFI_VAR_FULL_NAME}"="0"; then
+    echo "ERROR: Setting invalid EFI variable data unexpectedly succeeded" >&2
+    exit 1
+  fi
+
+  sub_test "Verify that a valid EFI variable can be set and read back from efivarfs"
+  lxc config uefi set v1 "${EFI_VAR_FULL_NAME}"="${EFI_VAR_VALUE}"
+
+  lxc start v1
+  waitInstanceReady v1
+  # The efivarfs file contains a 4-byte attribute header followed by the raw data,
+  # so use -a (treat binary as text) and -F (fixed string) without -x.
+  lxc exec v1 -- grep -aF "${EFI_VAR_VALUE_ASCII}" /sys/firmware/efi/efivars/"${EFI_VAR_FULL_NAME}"
+
+  sub_test "Verify unsetting an EFI variable while the VM is running is rejected"
+  if lxc config uefi unset v1 "${EFI_VAR_FULL_NAME}"; then
+    echo "ERROR: Unsetting EFI variable while VM is running unexpectedly succeeded" >&2
+    exit 1
+  fi
+
+  lxc stop -f v1
+
+  sub_test "Verify that an unset EFI variable is no longer present in the VM"
+  lxc config uefi unset v1 "${EFI_VAR_FULL_NAME}"
+
+  lxc start v1
+  waitInstanceReady v1
+  if lxc exec v1 -- test -e /sys/firmware/efi/efivars/"${EFI_VAR_FULL_NAME}"; then
+    echo "ERROR: EFI variable ${EFI_VAR_FULL_NAME} still exists after unsetting" >&2
+    exit 1
+  fi
+
+  lxc delete -f v1
+
+  if [ -n "${orig_volume_size:-}" ]; then
+    lxc storage set "${pool}" volume.size "${orig_volume_size}"
+  fi
+}
