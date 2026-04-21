@@ -6,8 +6,14 @@ test_network_ovn() {
 
   ensure_import_testimage
 
+  pool="lxdtest-$(basename "${LXD_DIR}")"
   if [ "${LXD_VM_TESTS}" != "0" ]; then
     ensure_import_ubuntu_vm_image
+    orig_volume_size="$(lxc storage get "${pool}" volume.size)"
+    if [ -n "${orig_volume_size:-}" ]; then
+      echo "==> Override the volume.size to accommodate a large VM"
+      lxc storage set "${pool}" volume.size "${SMALLEST_VM_ROOT_DISK}"
+    fi
   fi
 
   # Create an associative array holding table names and the expected number of rows for that table.
@@ -166,6 +172,11 @@ test_network_ovn() {
     waitInstanceReady v2
     [ "$(lxc exec v2 -- cat /sys/class/net/enp5s0/mtu)" = "8942" ]
     lxc delete --force v2
+
+    if [ -n "${orig_volume_size:-}" ]; then
+      echo "==> Restore the volume.size"
+      lxc storage set "${pool}" volume.size "${orig_volume_size}"
+    fi
   fi
 
   echo "Clean up instances."
