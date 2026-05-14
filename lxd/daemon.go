@@ -2040,6 +2040,9 @@ func (d *Daemon) init() error {
 	// Re-balance in case things changed while LXD was down
 	deviceTaskBalance(d.State())
 
+	// Setup systemd sleep inhibitor to pause running containers during host suspend.
+	setupSleepInhibitor(d.State())
+
 	// Unblock incoming requests
 	d.waitReady.Cancel()
 
