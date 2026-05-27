@@ -686,24 +686,7 @@ func clusterGroupPatch(d *Daemon, r *http.Request) response.Response {
 			}
 		}
 
-		groupID, err := dbCluster.GetClusterGroupID(ctx, tx.Tx(), obj.Name)
-		if err != nil {
-			return err
-		}
-
-		err = dbCluster.DeleteNodesClusterGroupsByGroupID(ctx, tx.Tx(), groupID)
-		if err != nil {
-			return err
-		}
-
-		for _, member := range req.Members {
-			err = tx.AddNodeToClusterGroup(ctx, name, member)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
+		return updateClusterGroupNodes(ctx, tx, name, members, req.Members)
 	})
 	if err != nil {
 		return response.SmartError(err)
