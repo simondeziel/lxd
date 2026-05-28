@@ -527,35 +527,7 @@ func clusterGroupPut(d *Daemon, r *http.Request) response.Response {
 			return err
 		}
 
-		// skipMembers is a list of members which already belong to the group.
-		skipMembers := []string{}
-
-		for _, oldMember := range members {
-			if !slices.Contains(req.Members, oldMember) {
-				// Remove member from this group. It belongs to at least one other group per the check above.
-				err = tx.RemoveNodeFromClusterGroup(ctx, name, oldMember)
-				if err != nil {
-					return err
-				}
-			} else {
-				skipMembers = append(skipMembers, oldMember)
-			}
-		}
-
-		for _, member := range req.Members {
-			// Skip these members as they already belong to this group.
-			if slices.Contains(skipMembers, member) {
-				continue
-			}
-
-			// Add new members to the group.
-			err = tx.AddNodeToClusterGroup(ctx, name, member)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
+		return updateClusterGroupNodes(ctx, tx, name, members, req.Members)
 	})
 	if err != nil {
 		return response.SmartError(err)
