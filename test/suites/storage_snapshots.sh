@@ -114,7 +114,12 @@ EOF
         ;;
     esac
 
-    ! lxc storage volume edit "${storage_pool}" "${storage_volume}/snap0" < "$tmp_yaml" 2>&1 | grep -xF "$ERROR_MSG" || false
+    local output
+    if output="$(CLIENT_DEBUG="" SHELL_TRACING="" lxc storage volume edit "${storage_pool}" "${storage_volume}/snap0" < "$tmp_yaml" 2>&1)"; then
+      echo "ERROR: lxc storage volume edit ${storage_pool}/${storage_volume}/snap0 unexpectedly succeeded, aborting" >&2
+      false
+    fi
+    [ "$output" = "$ERROR_MSG" ]
   done
   rm "${tmp_yaml}"
 
