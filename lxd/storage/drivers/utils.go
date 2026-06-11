@@ -35,7 +35,7 @@ var noKillRetryOpts = &shared.RunCommandRetryOpts{
 }
 
 // defaultVMBlockFilesystemSize is the size of a VM root device block volume's associated filesystem volume.
-const defaultVMBlockFilesystemSize = "160MiB"
+const defaultVMBlockFilesystemSize = "1GiB"
 
 // MinBlockBoundary minimum block boundary size to use.
 const MinBlockBoundary = 8192
