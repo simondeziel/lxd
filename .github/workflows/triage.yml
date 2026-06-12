@@ -9,14 +9,12 @@ permissions: {}
 
 jobs:
   label:
-    if: github.repository == 'canonical/lxd'
+    if: ${{ github.repository == 'canonical/lxd' }}
     permissions:
       contents: read  # for actions/labeler to determine modified files
       pull-requests: write  # for actions/labeler to add labels to PRs
     name: PR labels
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213 # v6.1.0
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          sync-labels: true
+      - name: This should skip on your fork
+        run: echo "If you see this, the restriction failed!"
