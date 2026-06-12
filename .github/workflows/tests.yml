@@ -806,7 +806,7 @@ jobs:
           name: coverage-${{ steps.sanitize.outputs.artifact_name }}
           path: ${{ env.GOCOVERDIR }}
           retention-days: 1
-        if: env.GOCOVERDIR != ''
+        if: env.GOCOVERDIR != '' && github.repository == 'canonical/lxd'
 
       - name: Tmate debugging session
         if: ${{ failure() && inputs.tmate-debug }}
