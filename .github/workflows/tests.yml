@@ -1032,7 +1032,7 @@ jobs:
           name: coverage-clients-${{ runner.os }}
           path: ${{env.GOCOVERDIR}}
           retention-days: 1
-        if: env.GOCOVERDIR != ''
+        if: env.GOCOVERDIR != '' && github.repository == 'canonical/lxd'
 
       - name: Upload lxc client artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
