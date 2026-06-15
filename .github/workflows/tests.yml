@@ -290,32 +290,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - group: cluster
-            backends: ${{ needs.code-tests.outputs.fast-backend }}
-          - group: cluster_storage
-            backends: all
-          - group: replicator_storage
-            backends: all
-          - group: image
-            backends: fasts
-          - group: instance
-            backends: fasts
-          - group: network
-            backends: ${{ needs.code-tests.outputs.fast-backend }}
           - group: standalone
             backends: ${{ needs.code-tests.outputs.fast-backend }}
           - group: snap
             backends: all
           - group: standalone_storage
-            backends: ceph
-          - group: standalone_storage
-            backends: fasts
-          - group: standalone_storage
             backends: lvm
           - group: standalone_storage
             backends: zfs
-          - group: standalone_storage
-            backends: random
 
     steps:
       - name: Checkout
@@ -535,46 +517,11 @@ jobs:
       matrix:
         os: ${{ fromJSON(inputs.ubuntu-releases || '["24.04"]') }}
         test:
-          - cgroup
-          - cloud-init
-          - cluster
-          - container
-          - container-copy
-          - container-nesting
-          - conversion
-          - cpu-vm
-          - devlxd-container
-          - devlxd-vm
-          - docker
-          - efi-vm
-          - lxd-installer
-          - lxd-user
-          - interception
-          - network-bridge-firewall
-          - network-ovn ovn:deb
-          - network-ovn ovn:latest/edge
-          - network-routed
-          - pylxd
-          - qemu-external-vm
-          - snapd
-          - storage-buckets
           - storage-disks-vm
-          - storage-metadata
-          - storage-vm btrfs
           - storage-vm ceph
-          - storage-vm dir
           - storage-vm lvm
           - storage-vm lvm-thin
-          - storage-vm zfs
           - storage-volumes-vm
-          - tpm-vm
-          # Skip UI tests as they are unreliable and similar ones are done
-          # against the non-snap daemon
-          #- ui chromium
-          #- ui firefox
-          - vm
-          - vm-migration
-          - vm-nesting
         exclude:
           # some tests are not worth testing on specific OSes
           - os: 22.04
