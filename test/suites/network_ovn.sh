@@ -1018,7 +1018,6 @@ test_network_ovn() {
 
     echo "==> Spawn a web server in all instances to serve traffic on port 80."
     for i in 1 2 3; do
-      # shellcheck disable=SC2016
       lxc exec "c${i}" -- sh -c 'hostname > /tmp/index.html && httpd -p 80 -h /tmp'
     done
 
@@ -1045,7 +1044,6 @@ test_network_ovn() {
   echo "==> Create a new instance (and target) with pre-defined address and attach it to the pool."
   lxc launch testimage c1 -n "${ovn_network}" -d "eth0,ipv4.address=10.24.140.50"
   setup_instance_ip4_interface c1
-  # shellcheck disable=SC2016
   lxc exec c1 -- sh -c 'hostname > /tmp/index.html && httpd -p 80 -h /tmp'
   lxc network load-balancer pool instance add "${ovn_network}" http c1
 
