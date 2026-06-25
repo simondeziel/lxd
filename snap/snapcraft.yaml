@@ -1290,12 +1290,10 @@ parts:
   zstd:
     plugin: nil
     stage-packages:
-      - zstd
-    organize:
-      usr/bin/: bin/
+      - zstd_bins
     prime:
-      - bin/pzstd
-      - bin/zstd
+      - usr/bin/pzstd
+      - usr/bin/zstd
 
   # Core components
   lxc:
