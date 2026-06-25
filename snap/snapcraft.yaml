@@ -214,11 +214,8 @@ parts:
   python-runtime:
     plugin: nil
     stage-packages:
-      - python3.14-minimal
-      - libpython3.14-stdlib
-    organize:
-      usr/bin/: bin/
-      usr/lib/: lib/
+      - python3.14-minimal_bins
+      - libpython3.14-stdlib_core
     prime:
       - bin/python3.14
       - lib/python3.14
