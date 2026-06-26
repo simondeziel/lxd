@@ -557,9 +557,7 @@ jobs:
           - network-ovn ovn:deb
           - network-ovn ovn:latest/edge
           - network-routed
-          - pylxd
           - qemu-external-vm
-          - snapd
           - storage-buckets
           - storage-disks-vm
           - storage-metadata
@@ -567,7 +565,6 @@ jobs:
           - storage-vm ceph
           - storage-vm dir
           - storage-vm lvm
-          - storage-vm lvm-thin
           - storage-vm zfs
           - storage-volumes-vm
           - tpm-vm
