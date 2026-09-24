@@ -4,7 +4,7 @@ gpu_get_first_card() {
 
   gpuCardName="$(basename "${gpuCardDev}")"
   gpuCardIndex="${gpuCardName#card}"
-  if ! echo "${gpuCardIndex}" | grep -Eq '^[0-9]+$'; then
+  if [[ ! "${gpuCardIndex}" =~ ^[0-9]+$ ]]; then
     return 1
   fi
 
