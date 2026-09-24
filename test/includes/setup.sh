@@ -14,7 +14,7 @@ ensure_import_testimage() {
     local alias="testimage"
 
     # Using `--project ""` causes `lxc` to interact with the current project.
-    if lxc image alias list -f csv --project "${project}" "${alias}" | grep "^${alias}," >/dev/null; then
+    if [[ "$(lxc image alias list -f csv "${alias}")" =~ ^"${alias}", ]]; then
         return
     fi
 
@@ -44,7 +44,7 @@ _import_ubuntu_image() {
     local project="${1:-}"
 
     # Using `--project ""` causes `lxc` to interact with the current project.
-    if lxc image alias list -f csv --project "${project}" "${alias}" | grep "^${alias}," >/dev/null; then
+    if [[ "$(lxc image alias list -f csv "${alias}")" =~ ^"${alias}," ]]; then
         return
     fi
 
