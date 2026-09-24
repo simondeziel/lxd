@@ -1557,7 +1557,7 @@ func (d *qemu) start(ctx context.Context, stateful bool, op *operationlock.Insta
 	}
 
 	// Get qemu configuration and check qemu is installed.
-	qemuPath, qemuBus, err := d.qemuArchConfig(d.architecture)
+	qemuPath, qemuBus, err := qemuArchConfig(d.hostArchitecture(), d.architecture)
 	if err != nil {
 		op.Done(err)
 		return err
@@ -1630,6 +1630,11 @@ func (d *qemu) start(ctx context.Context, stateful bool, op *operationlock.Insta
 	}
 
 	cpuType := "host"
+	if d.useTCG() {
+		// The "host" CPU model requires KVM.
+		cpuType = "max"
+	}
+
 	if len(cpuExtensions) > 0 {
 		cpuType += "," + strings.Join(cpuExtensions, ",")
 	}
@@ -2149,6 +2154,7 @@ func (d *qemu) AgentCertificate() *x509.Certificate {
 
 func (d *qemu) architectureSupportsUEFI(arch int) bool {
 	return slices.Contains([]int{osarch.ARCH_64BIT_INTEL_X86,
+		osarch.ARCH_32BIT_ARMV7_LITTLE_ENDIAN,
 		osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN,
 		osarch.ARCH_64BIT_RISCV_LITTLE_ENDIAN},
 		arch)
@@ -2320,7 +2326,50 @@ func (d *qemu) setupNvram() error {
 	return nil
 }
 
-func (d *qemu) qemuArchConfig(arch int) (path string, bus string, err error) {
+// qemuEmulatedArchitectures lists, per host architecture, the guest architectures run through QEMU TCG emulation.
+var qemuEmulatedArchitectures = map[int][]int{
+	osarch.ARCH_64BIT_INTEL_X86: {
+		osarch.ARCH_64BIT_RISCV_LITTLE_ENDIAN,
+		osarch.ARCH_32BIT_ARMV7_LITTLE_ENDIAN,
+	},
+}
+
+// qemuUseTCG returns whether guestArch must be run through TCG emulation instead of KVM on hostArch.
+func qemuUseTCG(hostArch int, guestArch int) bool {
+	return slices.Contains(qemuEmulatedArchitectures[hostArch], guestArch)
+}
+
+// qemuArchBinary returns the QEMU binary name and bus type used to run guestArch on hostArch.
+func qemuArchBinary(hostArch int, guestArch int) (binary string, bus string, err error) {
+	switch guestArch {
+	case osarch.ARCH_64BIT_INTEL_X86:
+		return "qemu-system-x86_64", "pcie", nil
+	case osarch.ARCH_32BIT_ARMV7_LITTLE_ENDIAN:
+		if qemuUseTCG(hostArch, guestArch) {
+			return "qemu-system-arm", "pcie", nil
+		}
+
+		return "qemu-system-aarch64", "pcie", nil
+	case osarch.ARCH_32BIT_ARMV8_LITTLE_ENDIAN, osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN:
+		return "qemu-system-aarch64", "pcie", nil
+	case osarch.ARCH_64BIT_POWERPC_LITTLE_ENDIAN:
+		return "qemu-system-ppc64", "pci", nil
+	case osarch.ARCH_64BIT_RISCV_LITTLE_ENDIAN:
+		return "qemu-system-riscv64", "pcie", nil
+	case osarch.ARCH_64BIT_S390_BIG_ENDIAN:
+		return "qemu-system-s390x", "ccw", nil
+	}
+
+	return "", "", errors.New("Architecture is not supported for virtual machines")
+}
+
+// qemuArchConfig returns the path to the QEMU binary and the bus type used to run guestArch on hostArch.
+func qemuArchConfig(hostArch int, guestArch int) (path string, bus string, err error) {
+	binary, bus, err := qemuArchBinary(hostArch, guestArch)
+	if err != nil {
+		return "", "", err
+	}
+
 	basePath := ""
 	if shared.InSnap() {
 		snapQEMUPrefix := os.Getenv("SNAP_QEMU_PREFIX")
@@ -2329,45 +2378,22 @@ func (d *qemu) qemuArchConfig(arch int) (path string, bus string, err error) {
 		}
 	}
 
-	switch arch {
-	case osarch.ARCH_64BIT_INTEL_X86:
-		path, err := exec.LookPath(basePath + "qemu-system-x86_64")
-		if err != nil {
-			return "", "", err
-		}
-
-		return path, "pcie", nil
-	case osarch.ARCH_32BIT_ARMV7_LITTLE_ENDIAN, osarch.ARCH_32BIT_ARMV8_LITTLE_ENDIAN, osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN:
-		path, err := exec.LookPath(basePath + "qemu-system-aarch64")
-		if err != nil {
-			return "", "", err
-		}
-
-		return path, "pcie", nil
-	case osarch.ARCH_64BIT_POWERPC_LITTLE_ENDIAN:
-		path, err := exec.LookPath(basePath + "qemu-system-ppc64")
-		if err != nil {
-			return "", "", err
-		}
-
-		return path, "pci", nil
-	case osarch.ARCH_64BIT_RISCV_LITTLE_ENDIAN:
-		path, err := exec.LookPath(basePath + "qemu-system-riscv64")
-		if err != nil {
-			return "", "", err
-		}
-
-		return path, "pcie", nil
-	case osarch.ARCH_64BIT_S390_BIG_ENDIAN:
-		path, err := exec.LookPath(basePath + "qemu-system-s390x")
-		if err != nil {
-			return "", "", err
-		}
-
-		return path, "ccw", nil
+	path, err = exec.LookPath(basePath + binary)
+	if err != nil {
+		return "", "", err
 	}
 
-	return "", "", errors.New("Architecture is not supported for virtual machines")
+	return path, bus, nil
+}
+
+// hostArchitecture returns the architecture of the host running the instance.
+func (d *qemu) hostArchitecture() int {
+	return d.state.OS.Architectures[0]
+}
+
+// useTCG returns whether the instance must be run through TCG emulation instead of KVM.
+func (d *qemu) useTCG() bool {
+	return qemuUseTCG(d.hostArchitecture(), d.architecture)
 }
 
 // RegisterDevices calls the Register() function on all of the instance's devices.
@@ -2846,7 +2872,7 @@ func (d *qemu) deviceAttachNIC(netIF []deviceConfig.RunConfigItem) error {
 		return errors.New("Device did not provide a link property to use")
 	}
 
-	_, qemuBus, err := d.qemuArchConfig(d.architecture)
+	_, qemuBus, err := qemuArchConfig(d.hostArchitecture(), d.architecture)
 	if err != nil {
 		return err
 	}
@@ -2872,7 +2898,7 @@ func (d *qemu) deviceAttachNIC(netIF []deviceConfig.RunConfigItem) error {
 
 // deviceAttachPCI live attaches a generic PCI device to the instance.
 func (d *qemu) deviceAttachPCI(pciConfig []deviceConfig.RunConfigItem) error {
-	_, qemuBus, err := d.qemuArchConfig(d.architecture)
+	_, qemuBus, err := qemuArchConfig(d.hostArchitecture(), d.architecture)
 	if err != nil {
 		return err
 	}
@@ -2995,7 +3021,7 @@ func (d *qemu) deviceDetachNIC(deviceName string) error {
 		return err
 	}
 
-	_, qemuBus, err := d.qemuArchConfig(d.architecture)
+	_, qemuBus, err := qemuArchConfig(d.hostArchitecture(), d.architecture)
 	if err != nil {
 		return err
 	}
@@ -3043,7 +3069,7 @@ func (d *qemu) deviceDetachPCI(deviceName string) error {
 		return fmt.Errorf("Failed removing PCI device: %w", err)
 	}
 
-	_, qemuBus, err := d.qemuArchConfig(d.architecture)
+	_, qemuBus, err := qemuArchConfig(d.hostArchitecture(), d.architecture)
 	if err != nil {
 		return err
 	}
@@ -3694,7 +3720,7 @@ func (d *qemu) deviceBootPriorities(base int) (map[string]int, error) {
 func (d *qemu) generateQemuConfigFile(cpuInfo *cpuTopology, maxCPUs int, mountInfo *storagePools.MountInfo, busName string, vsockFD int, devConfs []*deviceConfig.RunConfig, fdFiles *[]*os.File) (string, []monitorHook, error) {
 	var monHooks []monitorHook
 
-	cfg := qemuBase(&qemuBaseOpts{d.Architecture()})
+	cfg := qemuBase(&qemuBaseOpts{architecture: d.Architecture(), tcg: d.useTCG()})
 
 	err := d.addCPUMemoryConfig(&cfg, cpuInfo, maxCPUs)
 	if err != nil {
@@ -4418,6 +4444,11 @@ func (d *qemu) addDriveDirConfig(cfg *[]cfgSection, busName string, busAllocate 
 func (d *qemu) addDriveConfig(busAllocate busAllocator, bootIndexes map[string]int, driveConf deviceConfig.MountEntryItem) (monitorHook, error) {
 	// Check if the user has overridden the bus.
 	busName := "virtio-scsi"
+	if d.architecture == osarch.ARCH_32BIT_ARMV7_LITTLE_ENDIAN {
+		// The 32-bit ARM firmware (U-Boot) has no virtio-scsi driver so cannot boot from it.
+		busName = "virtio-blk"
+	}
+
 	for _, opt := range driveConf.Opts {
 		name, found := strings.CutPrefix(opt, "bus=")
 		if found {
@@ -9372,7 +9403,7 @@ func (d *qemu) Info() instance.Info {
 		return data
 	}
 
-	qemuPath, _, err := d.qemuArchConfig(hostArch)
+	qemuPath, _, err := qemuArchConfig(hostArch, hostArch)
 	if err != nil {
 		data.Error = errors.New("QEMU command not available for CPU architecture")
 		return data
@@ -9404,6 +9435,16 @@ func (d *qemu) Info() instance.Info {
 		logger.Errorf("Cannot run feature checks during QEMU initialization: %v", err)
 		data.Error = errors.New("QEMU failed running feature checks")
 		return data
+	}
+
+	// Cross-architecture emulation is only supported with the QEMU binaries and firmware shipped in the snap.
+	if shared.InSnap() {
+		for _, arch := range qemuEmulatedArchitectures[hostArch] {
+			_, _, err := qemuArchConfig(hostArch, arch)
+			if err == nil {
+				data.EmulatedArchitectures = append(data.EmulatedArchitectures, arch)
+			}
+		}
 	}
 
 	data.Error = nil
