@@ -412,10 +412,7 @@ fine_grained: true"
     .effective_groups | sort == ["test-group", "test-idp-mapped-group"]
   '
 
-  output="$(lxc auth identity show oidc/test-user@example.com)"
-  echo "$output" | grep -q "effective_groups:"
-  echo "$output" | grep -q "test-group"
-  echo "$output" | grep -q "test-idp-mapped-group"
+  lxc auth identity show oidc/test-user@example.com | yq --exit-status '(.effective_groups | sort) == ["test-group", "test-idp-mapped-group"]'
 
   lxc auth identity-provider-group group remove test-idp-group test-idp-mapped-group
   lxc auth group delete test-idp-mapped-group
