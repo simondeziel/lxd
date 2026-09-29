@@ -1270,6 +1270,9 @@ parts:
       find . -type f -name "zpool" -path "*/.libs/*" -exec cp {} "${CRAFT_PART_INSTALL}/zfs-${ZFS_VER}/bin/" \;
       find . -name "*.so*" -path "*/.libs/*" -exec cp -P {} "${CRAFT_PART_INSTALL}/zfs-${ZFS_VER}/lib/" \;
 
+      # Clean object files and intermediate binaries left behind in the source directory
+      make clean || find . -type f \( -name "*.o" -o -name "*.lo" -o -name "*.la" -o -name "*.a" \) -delete
+
   zfs-2-3:
     source: https://github.com/openzfs/zfs
     source-commit: 4c0eb7203e5a2b147d1d5e27b5e2a3461a95c1dc # zfs-2.3.9
@@ -1311,6 +1314,9 @@ parts:
       find . -type f -name "zpool" -path "*/.libs/*" -exec cp {} "${CRAFT_PART_INSTALL}/zfs-${ZFS_VER}/bin/" \;
       find . -name "*.so*" -path "*/.libs/*" -exec cp -P {} "${CRAFT_PART_INSTALL}/zfs-${ZFS_VER}/lib/" \;
 
+      # Clean object files and intermediate binaries left behind in the source directory
+      make clean || find . -type f \( -name "*.o" -o -name "*.lo" -o -name "*.la" -o -name "*.a" \) -delete
+
   zfs-2-4:
     source: https://github.com/openzfs/zfs
     source-commit: 71a9f9578616a90c3c14bb59629fb4d31bfd68d1 # zfs-2.4.4
@@ -1351,6 +1357,9 @@ parts:
       find . -type f -name "zfs" -path "*/.libs/*" -exec cp {} "${CRAFT_PART_INSTALL}/zfs-${ZFS_VER}/bin/" \;
       find . -type f -name "zpool" -path "*/.libs/*" -exec cp {} "${CRAFT_PART_INSTALL}/zfs-${ZFS_VER}/bin/" \;
       find . -name "*.so*" -path "*/.libs/*" -exec cp -P {} "${CRAFT_PART_INSTALL}/zfs-${ZFS_VER}/lib/" \;
+
+      # Clean object files and intermediate binaries left behind in the source directory
+      make clean || find . -type f \( -name "*.o" -o -name "*.lo" -o -name "*.la" -o -name "*.a" \) -delete
 
   zstd:
     plugin: nil
