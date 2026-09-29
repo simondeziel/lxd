@@ -590,6 +590,9 @@ parts:
 
       # Cleanup debug vars
       rm -f "${CRAFT_PART_INSTALL}/share/qemu/${DST_VARS}.debug.fd"
+
+      # Purge intermediate build stamps, temporary debian install trees, and EDK2 Build folder
+      rm -rf Build/ debian/tmp debian/*-install debian/setup-build-stamp
     prime:
       - share/qemu/*
 
