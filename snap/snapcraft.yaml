@@ -1724,6 +1724,10 @@ parts:
 
       mkdir -p "${CRAFT_PART_INSTALL}/share"
       cp -R build/ui "${CRAFT_PART_INSTALL}/share/lxd-ui/"
+
+      # Delete node_modules and clean Yarn cache once the static UI files are built
+      rm -rf node_modules
+      yarn cache clean || true
     prime:
       - share/lxd-ui*
 
