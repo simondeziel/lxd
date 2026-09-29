@@ -1099,6 +1099,9 @@ parts:
       set +ex
       craftctl default
 
+      # Free up gigabytes of object files (.o) and intermediate libraries in the build dir
+      rm -rf "${CRAFT_PART_BUILD}"/*
+
     organize:
       usr/bin/: bin/
       usr/lib/: lib/
