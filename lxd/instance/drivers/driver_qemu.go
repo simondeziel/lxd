@@ -1730,6 +1730,11 @@ func (d *qemu) start(ctx context.Context, stateful bool, op *operationlock.Insta
 	}
 
 	cpuType := "host"
+	if d.useTCG() {
+		// The "host" CPU model requires KVM.
+		cpuType = "max"
+	}
+
 	if len(cpuExtensions) > 0 {
 		cpuType += "," + strings.Join(cpuExtensions, ",")
 	}
@@ -2483,6 +2488,11 @@ func qemuArchConfig(hostArch int, guestArch int) (path string, bus string, err e
 // hostArchitecture returns the architecture of the host running the instance.
 func (d *qemu) hostArchitecture() int {
 	return d.state.OS.Architectures[0]
+}
+
+// useTCG returns whether the instance must be run through TCG emulation instead of KVM.
+func (d *qemu) useTCG() bool {
+	return qemuUseTCG(d.hostArchitecture(), d.architecture)
 }
 
 // RegisterDevices calls the Register() function on all of the instance's devices.
@@ -3852,7 +3862,7 @@ func (d *qemu) deviceBootPriorities(base int) (map[string]int, error) {
 func (d *qemu) generateQemuConfigFile(cpuInfo *cpuTopology, maxCPUs int, mountInfo *storagePools.MountInfo, busName string, vsockFD int, devConfs []*deviceConfig.RunConfig, fdFiles *[]*os.File) (string, []monitorHook, error) {
 	var monHooks []monitorHook
 
-	cfg := qemuBase(&qemuBaseOpts{d.Architecture()})
+	cfg := qemuBase(&qemuBaseOpts{architecture: d.Architecture(), tcg: d.useTCG()})
 
 	err := d.addCPUMemoryConfig(&cfg, cpuInfo, maxCPUs)
 	if err != nil {
