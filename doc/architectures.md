@@ -69,5 +69,8 @@ Emulated virtual machines have the following limitations:
 - They are considerably slower than virtual machines using hardware virtualization.
 - Secure Boot is not available, so {config:option}`instance-boot:boot.mode` must be set to `uefi-nosecureboot`.
 - The LXD agent is not available, so commands like `lxc exec` and `lxc file` do not work.
+  `cloud-init` configuration can still be provided using a {ref}`cloud-init configuration disk <vm-cloud-init-config>`.
+- `riscv64` virtual machines cannot be stopped cleanly, so `lxc stop --force` must be used.
 - Automatic cluster placement does not consider emulated architectures, so use `--target` to create such instances in a cluster.
-- `armv7l` virtual machines boot using `U-Boot` firmware and default to `virtio-blk` for their disks.
+- `armv7l` virtual machines boot using `U-Boot` firmware and default to `virtio-blk` for their root disk.
+- Ubuntu `armv7l` guests do not support hot-plugging PCIe devices, such as NICs or `virtio-blk` disks. Hot-plugging `virtio-scsi` disks works.
