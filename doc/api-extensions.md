@@ -3818,3 +3818,9 @@ New `lxc` commands:
 * `lxc bitmap list` and `lxc bitmap show` list the bitmaps of an instance snapshot.
 * `lxc nbd` exports an instance snapshot over NBD, with `--previous-snapshot-uuid` to limit the bitmaps.
 * `lxc storage volume nbd --writable` serves a storage volume read-write over NBD.
+
+(extension-vm-emulated-architectures)=
+## `vm_emulated_architectures`
+
+Adds a `vm_emulated_architectures` field to the server environment (`GET /1.0`) listing the additional architectures that virtual machines can use through emulation.
+See {ref}`architectures-vm-emulation` for more information.
