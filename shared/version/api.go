@@ -516,6 +516,7 @@ var APIExtensions = []string{
 	"server_state",
 	"storage_volume_block_tracking",
 	"cluster_members_state_recursion",
+	"vm_emulated_architectures",
 }
 
 // APIExtensionsCount returns the number of available API extensions.
