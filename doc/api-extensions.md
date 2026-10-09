@@ -3835,5 +3835,5 @@ The state of all members is fetched in parallel by the member handling the reque
 ## `vm_emulated_architectures`
 
 Adds a `vm_emulated_architectures` field to the server environment (`GET /1.0`) listing the additional architectures that virtual machines can use through emulation.
-It also adds the {config:option}`project-restricted:restricted.virtual-machines.emulation` project configuration key, which must be set to `allow` for {config:option}`project-restricted:restricted` projects to use those architectures.
+It also adds the {config:option}`project-restricted:restricted.virtual-machines.emulated-architectures` project configuration key, which lists the emulated architectures that {config:option}`project-restricted:restricted` projects can use.
 See {ref}`architectures-vm-emulation` for more information.
