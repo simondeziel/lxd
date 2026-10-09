@@ -1232,7 +1232,7 @@ func (d *qemu) start(ctx context.Context, stateful bool, op *operationlock.Insta
 	supportsUEFI := d.architectureSupportsUEFI(d.architecture)
 
 	if d.useTCG() {
-		err = limits.AllowVMEmulation(&d.project)
+		err = limits.AllowVMEmulation(&d.project, d.architecture)
 		if err != nil {
 			return err
 		}

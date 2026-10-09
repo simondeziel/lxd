@@ -89,7 +89,7 @@ func AllowInstanceCreation(globalConfig *clusterConfig.Config, info ProjectInfo,
 	if instanceType == instancetype.VM && req.Architecture != "" {
 		architecture, err := osarch.ArchitectureId(req.Architecture)
 		if err == nil && slices.Contains(emulatedArchitectures, architecture) {
-			err = AllowVMEmulation(&info.Project)
+			err = AllowVMEmulation(&info.Project, architecture)
 			if err != nil {
 				return err
 			}
@@ -963,31 +963,31 @@ var allInstanceAggregateLimits = []string{
 
 // allRestrictions lists all available 'restrict.*' config keys along with their default setting.
 var allRestrictions = map[string]string{
-	"restricted.backups":                    "block",
-	"restricted.cluster.groups":             "",
-	"restricted.cluster.target":             "block",
-	"restricted.containers.nesting":         "block",
-	"restricted.containers.interception":    "block",
-	"restricted.containers.lowlevel":        "block",
-	"restricted.containers.privilege":       "unprivileged",
-	"restricted.virtual-machines.lowlevel":  "block",
-	"restricted.virtual-machines.emulation": "block",
-	"restricted.devices.unix-char":          "block",
-	"restricted.devices.unix-block":         "block",
-	"restricted.devices.unix-hotplug":       "block",
-	"restricted.devices.infiniband":         "block",
-	"restricted.devices.gpu":                "block",
-	"restricted.devices.usb":                "block",
-	"restricted.devices.pci":                "block",
-	"restricted.devices.proxy":              "block",
-	"restricted.devices.nic":                "managed",
-	"restricted.devices.disk":               "managed",
-	"restricted.devices.disk.paths":         "",
-	"restricted.idmap.uid":                  "",
-	"restricted.idmap.gid":                  "",
-	"restricted.networks.access":            "",
-	"restricted.snapshots":                  "block",
-	"restricted.registries":                 "builtin",
+	"restricted.backups":                                 "block",
+	"restricted.cluster.groups":                          "",
+	"restricted.cluster.target":                          "block",
+	"restricted.containers.nesting":                      "block",
+	"restricted.containers.interception":                 "block",
+	"restricted.containers.lowlevel":                     "block",
+	"restricted.containers.privilege":                    "unprivileged",
+	"restricted.virtual-machines.lowlevel":               "block",
+	"restricted.virtual-machines.emulated-architectures": "",
+	"restricted.devices.unix-char":                       "block",
+	"restricted.devices.unix-block":                      "block",
+	"restricted.devices.unix-hotplug":                    "block",
+	"restricted.devices.infiniband":                      "block",
+	"restricted.devices.gpu":                             "block",
+	"restricted.devices.usb":                             "block",
+	"restricted.devices.pci":                             "block",
+	"restricted.devices.proxy":                           "block",
+	"restricted.devices.nic":                             "managed",
+	"restricted.devices.disk":                            "managed",
+	"restricted.devices.disk.paths":                      "",
+	"restricted.idmap.uid":                               "",
+	"restricted.idmap.gid":                               "",
+	"restricted.networks.access":                         "",
+	"restricted.snapshots":                               "block",
+	"restricted.registries":                              "builtin",
 }
 
 // allowableIntercept lists all syscall interception keys which may be allowed.
@@ -1707,10 +1707,20 @@ func AllowSnapshotCreation(p *api.Project) error {
 	return nil
 }
 
-// AllowVMEmulation returns an error if the project does not allow virtual machines using emulation.
-func AllowVMEmulation(p *api.Project) error {
-	if projectHasRestriction(p, "restricted.virtual-machines.emulation", "block") {
-		return fmt.Errorf("Project %q does not allow virtual machines using emulation", p.Name)
+// AllowVMEmulation returns an error if the project does not allow virtual machines emulating the given architecture.
+func AllowVMEmulation(p *api.Project, architecture int) error {
+	if shared.IsFalseOrEmpty(p.Config["restricted"]) {
+		return nil
+	}
+
+	architectureName, err := osarch.ArchitectureName(architecture)
+	if err != nil {
+		return err
+	}
+
+	allowed := shared.SplitNTrimSpace(p.Config["restricted.virtual-machines.emulated-architectures"], ",", -1, true)
+	if !slices.Contains(allowed, architectureName) {
+		return fmt.Errorf("Project %q does not allow virtual machines emulating the %q architecture", p.Name, architectureName)
 	}
 
 	return nil

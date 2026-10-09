@@ -793,7 +793,7 @@ func CreateInternal(ctx context.Context, s *state.State, args db.InstanceArgs, c
 			return err
 		}
 
-		return limits.AllowVMEmulation(apiProject)
+		return limits.AllowVMEmulation(apiProject, args.Architecture)
 	})
 	if err != nil {
 		return nil, nil, nil, err

@@ -2131,16 +2131,15 @@ func projectValidateConfig(ctx context.Context, s *state.State, config map[strin
 		//  defaultdesc: `block`
 		//  shortdesc: When set to `block`, using low-level VM options is prevented
 		"restricted.virtual-machines.lowlevel": isEitherAllowOrBlock,
-		// lxdmeta:generate(entities=project; group=restricted; key=restricted.virtual-machines.emulation)
-		// Possible values are `allow` or `block`.
-		// When set to `allow`, virtual machines can use architectures that the host only supports through emulation.
+		// lxdmeta:generate(entities=project; group=restricted; key=restricted.virtual-machines.emulated-architectures)
+		// Specify a comma-separated list of architectures (for example, `riscv64,armv7l`) that virtual machines can use when the host only supports them through emulation.
+		// If not set, virtual machines cannot use emulated architectures.
 		// Emulation does not provide the isolation guarantees of hardware virtualization.
 		// See {ref}`architectures-vm-emulation` for more information.
 		// ---
 		//  type: string
-		//  defaultdesc: `block`
-		//  shortdesc: When set to `block`, using emulated virtual machine architectures is prevented
-		"restricted.virtual-machines.emulation": isEitherAllowOrBlock,
+		//  shortdesc: Emulated architectures that virtual machines can use
+		"restricted.virtual-machines.emulated-architectures": validate.Optional(validate.IsListOf(validate.IsArchitecture)),
 		// lxdmeta:generate(entities=project; group=restricted; key=restricted.devices.unix-char)
 		// Possible values are `allow` or `block`.
 		// ---
