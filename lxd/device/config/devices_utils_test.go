@@ -1,10 +1,31 @@
 package config
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/canonical/lxd/shared/validate"
 )
+
+func TestFileName(t *testing.T) {
+	devNames := []string{"proxy", "proxy-1", "proxy/1", "proxy--1", "proxy//1", "a..b", "x/../../escaped", "../../../../etc/cron.d/x"}
+	fileNames := map[string]bool{}
+	for _, devName := range devNames {
+		fileName := FileName(devName)
+		assert.False(t, fileNames[fileName], "Duplicate file name %q for device %q", fileName, devName)
+		fileNames[fileName] = true
+
+		assert.NotContains(t, fileName, "/", "File name %q for device %q contains a slash", fileName, devName)
+
+		if strings.Contains(devName, "/") {
+			assert.Error(t, validate.IsDeviceName(fileName), "File name %q for device %q is a valid device name", fileName, devName)
+		} else {
+			assert.Equal(t, devName, fileName, "File name for device %q changed", devName)
+		}
+	}
+}
 
 func TestDeviceEqualsDiffKeys(t *testing.T) {
 	tests := []struct {
