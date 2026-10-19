@@ -63,6 +63,24 @@ container_devices_proxy_validation() {
 
   # Add the device again with the same listen param so if the old process hasn't been stopped it will fail to start.
   lxc config device add proxyTester proxyDev proxy "listen=tcp:127.0.0.1:$HOST_TCP_PORT" connect=tcp:127.0.0.1:4321 bind=host
+  lxc config device remove proxyTester proxyDev
+
+  # Check that the device name can't make the device use paths outside of its own.
+  echo canary > "${LXD_DIR}/devices/escaped"
+  echo canary > "${LXD_DIR}/logs/escaped.log"
+  lxc config device add proxyTester "x/../../escaped" proxy "listen=tcp:127.0.0.1:$HOST_TCP_PORT" connect=tcp:127.0.0.1:4321 bind=host
+  local devID
+  devID="$(printf '%s' "x/../../escaped" | sha256sum | cut -d' ' -f1)"
+  [ -s "${LXD_DIR}/devices/proxyTester/proxy.${devID}" ]
+  [ -s "${LXD_DIR}/logs/proxyTester/proxy.${devID}.log" ]
+  [ ! -e "${LXD_DIR}/security/apparmor/escaped_proxyTester" ]
+  lxc config device remove proxyTester "x/../../escaped"
+  [ "$(< "${LXD_DIR}/devices/escaped")" = "canary" ]
+  [ "$(< "${LXD_DIR}/logs/escaped.log")" = "canary" ]
+  rm "${LXD_DIR}/devices/escaped" "${LXD_DIR}/logs/escaped.log"
+
+  # Check that the forkproxy process is gone so the same listen address can be used again.
+  lxc config device add proxyTester proxyDev proxy "listen=tcp:127.0.0.1:$HOST_TCP_PORT" connect=tcp:127.0.0.1:4321 bind=host
 
   lxc delete -f proxyTester
 }
