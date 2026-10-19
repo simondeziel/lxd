@@ -22,12 +22,12 @@ import (
 
 // cdiHooksFilePath returns the path to the CDI hooks file for the named device.
 func cdiHooksFilePath(devicesPath, devName string) string {
-	return filepath.Join(devicesPath, devName+cdi.CDIHooksFileSuffix)
+	return filepath.Join(devicesPath, deviceConfig.FileName(devName)+cdi.CDIHooksFileSuffix)
 }
 
 // cdiConfigDevicesFilePath returns the path to the CDI config devices file for the named device.
 func cdiConfigDevicesFilePath(devicesPath, devName string) string {
-	return filepath.Join(devicesPath, devName+cdi.CDIConfigDevicesFileSuffix)
+	return filepath.Join(devicesPath, deviceConfig.FileName(devName)+cdi.CDIConfigDevicesFileSuffix)
 }
 
 // startCDIDevices starts all the devices given in a CDI specification:
