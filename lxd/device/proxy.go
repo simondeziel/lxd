@@ -308,9 +308,9 @@ func (d *proxy) Start() (*deviceConfig.RunConfig, error) {
 				return err
 			}
 
-			devFileName := "proxy." + d.name
+			devFileName := "proxy." + deviceConfig.FileName(d.name)
 			pidPath := filepath.Join(d.inst.DevicesPath(), devFileName)
-			logFileName := fmt.Sprintf("proxy.%s.log", d.name)
+			logFileName := fmt.Sprintf("proxy.%s.log", deviceConfig.FileName(d.name))
 			logPath := filepath.Join(d.inst.LogPath(), logFileName)
 
 			// Load the apparmor profile
@@ -437,7 +437,7 @@ func (d *proxy) Stop() (*deviceConfig.RunConfig, error) {
 		logger.Errorf("Failed removing proxy NAT filters: %v", err)
 	}
 
-	devFileName := "proxy." + d.name
+	devFileName := "proxy." + deviceConfig.FileName(d.name)
 	devPath := filepath.Join(d.inst.DevicesPath(), devFileName)
 
 	if !shared.PathExists(devPath) {
