@@ -3872,20 +3872,23 @@ func (d *qemu) deviceBootPriorities(base int) (map[string]int, error) {
 func (d *qemu) generateQemuConfigFile(cpuInfo *cpuTopology, maxCPUs int, mountInfo *storagePools.MountInfo, busName string, vsockFD int, devConfs []*deviceConfig.RunConfig, fdFiles *[]*os.File) (string, []monitorHook, error) {
 	var monHooks []monitorHook
 
-	cfg := qemuBase(&qemuBaseOpts{d.Architecture()})
-
-	err := d.addCPUMemoryConfig(&cfg, cpuInfo, maxCPUs)
-	if err != nil {
-		return "", nil, err
-	}
-
 	// Parse raw.qemu.
 	rawOptions := []string{}
 	if d.expandedConfig["raw.qemu"] != "" {
+		var err error
 		rawOptions, err = shellquote.Split(d.expandedConfig["raw.qemu"])
 		if err != nil {
 			return "", nil, err
 		}
+	}
+
+	customNUMA := qemuRawDefinesNUMANode(rawOptions)
+
+	cfg := qemuBase(&qemuBaseOpts{architecture: d.Architecture(), customNUMA: customNUMA})
+
+	err := d.addCPUMemoryConfig(&cfg, cpuInfo, maxCPUs, customNUMA)
+	if err != nil {
+		return "", nil, err
 	}
 
 	// Allow disabling the UEFI firmware.
@@ -4357,11 +4360,23 @@ func (d *qemu) generateQemuConfigFile(cpuInfo *cpuTopology, maxCPUs int, mountIn
 	return configPath, monHooks, os.WriteFile(configPath, []byte(sb.String()), 0640)
 }
 
+// qemuRawDefinesNUMANode returns true if the raw.qemu options define a NUMA node (-numa node,...).
+func qemuRawDefinesNUMANode(rawOptions []string) bool {
+	for i, option := range rawOptions {
+		if (option == "-numa" || option == "--numa") && i+1 < len(rawOptions) && strings.HasPrefix(rawOptions[i+1], "node") {
+			return true
+		}
+	}
+
+	return false
+}
+
 // addCPUMemoryConfig adds the qemu config required for setting the number of virtualised CPUs and memory.
 // If sb is nil then no config is written.
-func (d *qemu) addCPUMemoryConfig(cfg *[]cfgSection, cpuInfo *cpuTopology, maxCPUs int) error {
+func (d *qemu) addCPUMemoryConfig(cfg *[]cfgSection, cpuInfo *cpuTopology, maxCPUs int, customNUMA bool) error {
 	cpuOpts := qemuCPUOpts{
 		architecture:        d.architecture,
+		customNUMA:          customNUMA,
 		cpuMaxCPUs:          maxCPUs,
 		qemuMemObjectFormat: "indexed", // Supported by QEMU 6.0+
 	}

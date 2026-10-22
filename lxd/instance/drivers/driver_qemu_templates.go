@@ -135,6 +135,9 @@ func qemuDefaultRAMObject(architecture int) string {
 
 type qemuBaseOpts struct {
 	architecture int
+
+	// customNUMA is set when raw.qemu defines NUMA nodes, which are mutually exclusive with "memory-backend".
+	customNUMA bool
 }
 
 func qemuBase(opts *qemuBaseOpts) []cfgSection {
@@ -167,7 +170,7 @@ func qemuBase(opts *qemuBaseOpts) []cfgSection {
 	// is defined as an explicit shared memory backend (see qemuCPU) so that vhost-user
 	// devices such as virtiofsd can map it.
 	// The backend is attached to the machine through the "memory-backend" property.
-	if opts.architecture != osarch.ARCH_64BIT_INTEL_X86 {
+	if opts.architecture != osarch.ARCH_64BIT_INTEL_X86 && !opts.customNUMA {
 		memoryBackend := qemuDefaultRAMObject(opts.architecture)
 		if memoryBackend != "" {
 			entries = append(entries, cfgEntry{key: "memory-backend", value: memoryBackend})
@@ -517,6 +520,7 @@ type qemuNumaEntry struct {
 
 type qemuCPUOpts struct {
 	architecture        int
+	customNUMA          bool
 	cpuCount            int
 	cpuMaxCPUs          int
 	cpuSockets          int
@@ -586,9 +590,9 @@ func qemuCPU(opts *qemuCPUOpts, pinning bool) []cfgSection {
 
 	if opts.architecture != osarch.ARCH_64BIT_INTEL_X86 {
 		ramObjectName := qemuDefaultRAMObject(opts.architecture)
-		if ramObjectName == "" {
-			// Architecture without a known default RAM object; leave the guest
-			// memory as QEMU's implicit default.
+		if ramObjectName == "" || opts.customNUMA {
+			// Architecture without a known default RAM object, or guest memory laid
+			// out by the user's own NUMA options; leave it as QEMU's implicit default.
 			return sections
 		}
 
