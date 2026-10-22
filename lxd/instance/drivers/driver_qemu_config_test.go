@@ -1699,6 +1699,39 @@ func TestQemuBase_UnmappedArchitectureOmitsMemoryBackend(t *testing.T) {
 	}
 }
 
+func TestQemuCustomNUMAOmitsRAMBackend(t *testing.T) {
+	for _, entry := range qemuBase(&qemuBaseOpts{architecture: osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN, customNUMA: true})[0].entries {
+		if entry.key == "memory-backend" {
+			t.Fatal("Expected custom NUMA to omit memory-backend")
+		}
+	}
+
+	sections := qemuCPU(&qemuCPUOpts{architecture: osarch.ARCH_64BIT_ARMV8_LITTLE_ENDIAN, customNUMA: true, cpuCount: 4, memory: 1024}, false)
+	if len(sections) != 1 {
+		t.Fatalf("Expected only the smp-opts section, got %d sections", len(sections))
+	}
+}
+
+func TestQemuRawDefinesNUMANode(t *testing.T) {
+	tests := []struct {
+		raw      []string
+		expected bool
+	}{
+		{nil, false},
+		{[]string{"-object", "memory-backend-ram,size=16G,id=m0"}, false},
+		{[]string{"-numa", "dist,src=0,dst=1,val=20"}, false},
+		{[]string{"-numa", "node,nodeid=1"}, true},
+		{[]string{"-object", "memory-backend-ram,size=16G,id=m0", "-numa", "node,nodeid=0,memdev=m0"}, true},
+		{[]string{"-numa"}, false},
+	}
+
+	for _, tc := range tests {
+		if qemuRawDefinesNUMANode(tc.raw) != tc.expected {
+			t.Errorf("qemuRawDefinesNUMANode(%v) != %v", tc.raw, tc.expected)
+		}
+	}
+}
+
 // TestQemuCPU_NumaHostNodesPreservesOrder verifies that qemuCPU emits host-nodes.*
 // entries in the exact order provided by the caller. Deterministic ordering is the
 // responsibility of addCPUMemoryConfig, which iterates the host NUMA nodes in sorted
