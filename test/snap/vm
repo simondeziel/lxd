@@ -71,7 +71,8 @@ lxc delete -f v1
 if [ "$(uname -m)" != "x86_64" ]; then
     echo "==> SKIP: emulated VMs are only supported on x86_64"
 elif ! lxc query /1.0 | jq --exit-status '(.environment.vm_emulated_architectures // []) | contains(["riscv64", "armv7l"])'; then
-    echo "==> SKIP: the LXD snap does not support emulated riscv64 and armv7l VMs"
+    # Warn rather than fail as sideloaded binaries may run on a snap predating the emulators.
+    echo "::warning::SKIP: the LXD snap does not support emulated riscv64 and armv7l VMs"
 else
     for pair in riscv64:riscv64 armhf:armv7l; do
         IFS=: read -r image_arch lxd_arch <<< "${pair}"
@@ -97,12 +98,22 @@ else
 
         if [ -z "${ipv4}" ] || ! waitTCPPort "${ipv4}" 22 open 300 1; then
             echo "::error::Emulated ${lxd_arch} VM did not become reachable over SSH"
-            lxc console v-emu --show-log || true
             false
         fi
 
         fingerprint="$(lxc config get v-emu volatile.base_image)"
-        lxc delete -f v-emu
+
+        if [ "${lxd_arch}" = "riscv64" ]; then
+            # QEMU's riscv64 virt machine has no power button so only a forced stop works.
+            lxc stop -f v-emu
+        else
+            echo "==> Test cleanly stopping an emulated ${lxd_arch} VM"
+            lxc stop v-emu --timeout 180
+        fi
+
+        [ "$(lxc list -f csv -c s v-emu)" = "STOPPED" ]
+
+        lxc delete v-emu
         lxc image delete "${fingerprint}"
     done
 fi
