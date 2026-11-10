@@ -143,6 +143,7 @@ func qemuBase(opts *qemuBaseOpts) []cfgSection {
 	gicVersion := ""
 	capLargeDecr := ""
 	acpi := ""
+	aia := ""
 	accel := "kvm"
 
 	switch opts.architecture {
@@ -161,6 +162,11 @@ func qemuBase(opts *qemuBaseOpts) []cfgSection {
 	case osarch.ARCH_64BIT_RISCV_LITTLE_ENDIAN:
 		// Booting Linux 7.0 failed with acpi="on" (LP: #2153582)
 		acpi = "off"
+
+		if opts.tcg {
+			// Without MSI support from the AIA, PCIe hotplug hangs the guest.
+			aia = "aplic-imsic"
+		}
 	}
 
 	if opts.tcg {
@@ -174,6 +180,7 @@ func qemuBase(opts *qemuBaseOpts) []cfgSection {
 		{key: "cap-large-decr", value: capLargeDecr},
 		{key: "accel", value: accel},
 		{key: "acpi", value: acpi},
+		{key: "aia", value: aia},
 		{key: "usb", value: "off"},
 	}
 

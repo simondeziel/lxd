@@ -128,6 +128,7 @@ func TestQemuConfigTemplates(t *testing.T) {
 			type = "virt"
 			accel = "tcg"
 			acpi = "off"
+			aia = "aplic-imsic"
 			usb = "off"
 			memory-backend = "riscv_virt_board.ram"
 
