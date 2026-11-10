@@ -404,25 +404,36 @@ _vm_emulated_architectures() {
     return 0
   fi
 
-  sub_test "Emulated VMs require an explicit opt-in in restricted projects"
+  sub_test "Emulated VMs require an explicit opt-in per architecture in restricted projects"
   lxc project create emul -c restricted=true -c restricted.backups=allow
   output="$(! lxc query -X POST --wait "/1.0/instances?project=emul" -d "${req}" 2>&1 || false)"
-  echo "${output}" | grep -F 'Project "emul" does not allow virtual machines using emulation'
+  echo "${output}" | grep -F 'Project "emul" does not allow virtual machines emulating the "armv7l" architecture'
 
-  lxc project set emul restricted.virtual-machines.emulation=allow
+  # Allowing another emulated architecture is not enough.
+  lxc project set emul restricted.virtual-machines.emulated-architectures=riscv64
+  output="$(! lxc query -X POST --wait "/1.0/instances?project=emul" -d "${req}" 2>&1 || false)"
+  echo "${output}" | grep -F 'Project "emul" does not allow virtual machines emulating the "armv7l" architecture'
+
+  # Only canonical architecture names are accepted.
+  if lxc project set emul restricted.virtual-machines.emulated-architectures=riscv64,armhf; then
+    echo "ERROR: Architecture aliases should be rejected"
+    exit 1
+  fi
+
+  lxc project set emul restricted.virtual-machines.emulated-architectures=riscv64,armv7l
   lxc query -X POST --wait "/1.0/instances?project=emul" -d "${req}"
   lxc start v1 --project emul
   lxc stop -f v1 --project emul
   lxc export v1 "${TEST_DIR}/emul.tar.gz" --project emul --instance-only
 
-  # Existing emulated VMs cannot start once emulation is blocked again.
-  lxc project set emul restricted.virtual-machines.emulation=block
+  # Existing emulated VMs cannot start once their architecture is no longer allowed.
+  lxc project set emul restricted.virtual-machines.emulated-architectures=riscv64
   output="$(! lxc start v1 --project emul 2>&1 || false)"
-  echo "${output}" | grep -F 'Project "emul" does not allow virtual machines using emulation'
+  echo "${output}" | grep -F 'Project "emul" does not allow virtual machines emulating the "armv7l" architecture'
 
   # Restoring a backup of an emulated VM is also blocked.
   output="$(! lxc import "${TEST_DIR}/emul.tar.gz" v2 --project emul 2>&1 || false)"
-  echo "${output}" | grep -F 'Project "emul" does not allow virtual machines using emulation'
+  echo "${output}" | grep -F 'Project "emul" does not allow virtual machines emulating the "armv7l" architecture'
   rm "${TEST_DIR}/emul.tar.gz"
 
   lxc delete v1 --project emul
