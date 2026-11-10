@@ -3831,6 +3831,12 @@ Adds support for `recursion=2` on `GET /1.0/cluster/members`. In addition to the
 
 The state of all members is fetched in parallel by the member handling the request. The `state` field is `null` for offline members and for members whose state could not be retrieved.
 
+(extension-vm-emulated-architectures)=
+## `vm_emulated_architectures`
+
+Adds a `vm_emulated_architectures` field to the server environment (`GET /1.0`) listing the additional architectures that virtual machines can use through emulation.
+See {ref}`architectures-vm-emulation` for more information.
+
 (extension-instance-microvm)=
 ## `instance_microvm`
 
