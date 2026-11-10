@@ -464,39 +464,50 @@ func TestAllowVolumeMove_CrossProjectDoesNotCancelTargetVolume(t *testing.T) {
 
 func TestAllowVMEmulation(t *testing.T) {
 	tests := []struct {
-		name    string
-		config  map[string]string
-		wantErr bool
+		name         string
+		config       map[string]string
+		architecture int
+		wantErr      string
 	}{
 		{
-			name:   "unrestricted project",
-			config: map[string]string{},
+			name:         "unrestricted project",
+			config:       map[string]string{},
+			architecture: osarch.ARCH_64BIT_RISCV_LITTLE_ENDIAN,
 		},
 		{
-			name:    "restricted project blocks emulation by default",
-			config:  map[string]string{"restricted": "true"},
-			wantErr: true,
+			name:         "restricted project blocks emulation by default",
+			config:       map[string]string{"restricted": "true"},
+			architecture: osarch.ARCH_64BIT_RISCV_LITTLE_ENDIAN,
+			wantErr:      `Project "p1" does not allow virtual machines emulating the "riscv64" architecture`,
 		},
 		{
-			name:    "restricted project explicitly blocking emulation",
-			config:  map[string]string{"restricted": "true", "restricted.virtual-machines.emulation": "block"},
-			wantErr: true,
+			name:         "restricted project allowing the architecture",
+			config:       map[string]string{"restricted": "true", "restricted.virtual-machines.emulated-architectures": "riscv64"},
+			architecture: osarch.ARCH_64BIT_RISCV_LITTLE_ENDIAN,
 		},
 		{
-			name:   "restricted project allowing emulation",
-			config: map[string]string{"restricted": "true", "restricted.virtual-machines.emulation": "allow"},
+			name:         "restricted project allowing several architectures",
+			config:       map[string]string{"restricted": "true", "restricted.virtual-machines.emulated-architectures": "riscv64, armv7l"},
+			architecture: osarch.ARCH_32BIT_ARMV7_LITTLE_ENDIAN,
 		},
 		{
-			name:   "emulation block ignored when unrestricted",
-			config: map[string]string{"restricted": "false", "restricted.virtual-machines.emulation": "block"},
+			name:         "restricted project allowing another architecture",
+			config:       map[string]string{"restricted": "true", "restricted.virtual-machines.emulated-architectures": "riscv64"},
+			architecture: osarch.ARCH_32BIT_ARMV7_LITTLE_ENDIAN,
+			wantErr:      `Project "p1" does not allow virtual machines emulating the "armv7l" architecture`,
+		},
+		{
+			name:         "list ignored when unrestricted",
+			config:       map[string]string{"restricted": "false", "restricted.virtual-machines.emulated-architectures": ""},
+			architecture: osarch.ARCH_64BIT_RISCV_LITTLE_ENDIAN,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			err := limits.AllowVMEmulation(&api.Project{Name: "p1", Config: tc.config})
-			if tc.wantErr {
-				assert.EqualError(t, err, `Project "p1" does not allow virtual machines using emulation`)
+			err := limits.AllowVMEmulation(&api.Project{Name: "p1", Config: tc.config}, tc.architecture)
+			if tc.wantErr != "" {
+				assert.EqualError(t, err, tc.wantErr)
 				return
 			}
 
@@ -510,7 +521,7 @@ func TestAllowInstanceCreation_Emulation(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		emulation    string
+		allowed      string
 		instanceType api.InstanceType
 		architecture string
 		wantErr      bool
@@ -523,7 +534,7 @@ func TestAllowInstanceCreation_Emulation(t *testing.T) {
 		},
 		{
 			name:         "emulated VM allowed",
-			emulation:    "allow",
+			allowed:      "riscv64",
 			instanceType: api.InstanceTypeVM,
 			architecture: "riscv64",
 		},
@@ -546,8 +557,8 @@ func TestAllowInstanceCreation_Emulation(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			config := map[string]string{"restricted": "true"}
-			if tc.emulation != "" {
-				config["restricted.virtual-machines.emulation"] = tc.emulation
+			if tc.allowed != "" {
+				config["restricted.virtual-machines.emulated-architectures"] = tc.allowed
 			}
 
 			info := limits.ProjectInfo{Project: api.Project{Name: "p1", Config: config}}
@@ -556,7 +567,7 @@ func TestAllowInstanceCreation_Emulation(t *testing.T) {
 
 			err := limits.AllowInstanceCreation(nil, info, req, emulatedArchitectures)
 			if tc.wantErr {
-				assert.EqualError(t, err, `Project "p1" does not allow virtual machines using emulation`)
+				assert.EqualError(t, err, `Project "p1" does not allow virtual machines emulating the "riscv64" architecture`)
 				return
 			}
 
