@@ -5312,10 +5312,9 @@
 						}
 					},
 					{
-						"restricted.virtual-machines.emulation": {
-							"defaultdesc": "`block`",
-							"longdesc": "Possible values are `allow` or `block`.\nWhen set to `allow`, virtual machines can use architectures that the host only supports through emulation.\nEmulation does not provide the isolation guarantees of hardware virtualization.\nSee {ref}`architectures-vm-emulation` for more information.",
-							"shortdesc": "When set to `block`, using emulated virtual machine architectures is prevented",
+						"restricted.virtual-machines.emulated-architectures": {
+							"longdesc": "Specify a comma-separated list of architectures (for example, `riscv64,armv7l`) that virtual machines can use when the host only supports them through emulation.\nIf not set, virtual machines cannot use emulated architectures.\nEmulation does not provide the isolation guarantees of hardware virtualization.\nSee {ref}`architectures-vm-emulation` for more information.",
+							"shortdesc": "Emulated architectures that virtual machines can use",
 							"type": "string"
 						}
 					},
