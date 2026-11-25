@@ -287,17 +287,49 @@ test_storage() {
 
       # Test that all valid lvm storage pool configuration keys can be set.
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool16" lvm lvm.thinpool_name="lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config"
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool16"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool16" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool17" lvm lvm.vg_name="lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config"
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool17"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool18" lvm size=1GiB
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool18"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool18" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool19" lvm volume.block.filesystem=ext4
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool19"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool19" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool20" lvm volume.block.mount_options=discard
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool20"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool20" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool21" lvm volume.size=25MiB
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool21"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool21" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool22" lvm lvm.use_thinpool=true
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool22"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool22" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool23" lvm lvm.use_thinpool=true lvm.thinpool_name="lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config"
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool23"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool23" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool24" lvm rsync.bwlimit=1024
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool24"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool24" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool25" lvm volume.block.mount_options="rw,strictatime,discard"
       lxc storage set "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool25" volume.block.mount_options "rw,lazytime"
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool25"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool25" || true
+
       lxc storage create "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool26" lvm volume.block.filesystem=btrfs
+      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool26"
+      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool26" || true
     fi
 
     # Set default storage pool for image import.
@@ -785,36 +817,6 @@ test_storage() {
 
       lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool15"
       vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool15" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool16"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool16" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool17"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool17" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool18"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool18" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool19"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool19" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool20"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool20" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool21"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool21" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool22"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool22" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool23"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool23" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool24"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool24" || true
-
-      lxc storage delete "lxdtest-$(basename "${LXD_DIR}")-valid-lvm-pool-config-pool25"
-      vgremove -ff "lxdtest-$(basename "${LXD_DIR}")-non-thinpool-pool25" || true
     fi
   )
 
